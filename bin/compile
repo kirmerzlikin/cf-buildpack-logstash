@@ -7,7 +7,7 @@ BP=$(dirname $(dirname $0))
 VERSION=`cat ${BP}/VERSION`
 OPENJDK_URL="https://java-buildpack.cloudfoundry.org/openjdk-jdk/trusty/x86_64/openjdk-1.7.0_51.tar.gz"
 LOGSTASH_URL="https://download.elastic.co/logstash/logstash/logstash-${VERSION}.tar.gz"
-DOCKERIZE_URL="https://github.com/jwilder/dockerize/releases/download/v0.2.0/dockerize-linux-amd64-v0.2.0.tar.gz"
+DOCKERIZE_URL="https://github.com/breml/dockerize/releases/download/v0.2.1-jsonQuery/dockerize-linux-amd64-v0.2.1-jsonQuery.tar.gz"
 
 source $BP/bin/functions.sh
 
