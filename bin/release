@@ -4,6 +4,7 @@ set -euo pipefail # Enable bash strict mode (http://redsymbol.net/articles/unoff
 set -x # debug
 
 BP=$(dirname $(dirname $0))
+VERSION=`cat ${BP}/VERSION`
 
 source $BP/bin/functions.sh
 
@@ -12,5 +13,21 @@ if [[ -z "${1:-}" ]]; then
 	exit 1
 fi
 BUILDDIR=$(cd "${1:-}/" && pwd)
+
+#export JAVA_HOME="${BUILDDIR}/openjdk"
+#start "Check Logstash configuration"
+#${BUILDDIR}/logstash-${VERSION}/bin/logstash -f ${BUILDDIR}/logstash.conf -t >/dev/null
+#finished
+
+echo "Port: ${PORT:-}"
+echo "User: ${LOGSTASH_USER:-}"
+echo "Password: ${LOGSTASH_PASSWORD:-}"
+
+cat << EOF >> ${BUILDDIR}/buildpack-release-step.yml
+---
+default_process_types:
+  web: dockerize -template logstash.conf:conf.d/logstash.conf logstash-${VERSION}/bin/logstash -f conf.d/logstash.conf
+EOF
+
 
 echo "$(cat ${BUILDDIR}/buildpack-release-step.yml)"
