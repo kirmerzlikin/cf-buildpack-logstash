@@ -63,9 +63,9 @@ mkdir ${BUILDDIR}/conf.d
 #${BUILDDIR}/logstash-${VERSION}/bin/logstash -f ${BUILDDIR}/logstash.conf -t >/dev/null
 #finished
 
-echo "Port: $PORT"
-echo "User: $LOGSTASH_USER"
-echo "Password: $LOGSTASH_PASSWORD"
+echo "Port: ${PORT:-}"
+echo "User: ${LOGSTASH_USER:-}"
+echo "Password: ${LOGSTASH_PASSWORD:-}"
 
 cat << EOF >> ${BUILDDIR}/buildpack-release-step.yml
 ---
