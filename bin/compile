@@ -60,7 +60,7 @@ mkdir ${CACHEDIR}/conf.d
 
 export JAVA_HOME="${BUILDDIR}/openjdk"
 start "Check Logstash configuration"
-${BUILDDIR}/dockerize -template ${BUILDDIR}/logstash.conf:${CACHEDIR}/conf.d/logstash.conf ${BUILDDIR}/logstash-${VERSION}/bin/logstash -f ${CACHEDIR}/conf.d/logstash.conf -t >/dev/null
+${BUILDDIR}/bin/dockerize -template ${BUILDDIR}/logstash.conf:${CACHEDIR}/conf.d/logstash.conf ${BUILDDIR}/logstash-${VERSION}/bin/logstash -f ${CACHEDIR}/conf.d/logstash.conf -t >/dev/null
 finished
 
 mkdir ${BUILDDIR}/conf.d
