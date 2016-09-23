@@ -30,6 +30,10 @@ fi
 warn ${BUILDDIR}
 warn ${CACHEDIR}
 
+start "Installing jre"
+apt install default-jre
+finished
+
 #start "Installing dockerize"
 #mkdir ${BUILDDIR}/bin
 #cd ${BUILDDIR}/bin
