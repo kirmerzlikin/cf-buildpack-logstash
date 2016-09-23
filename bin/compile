@@ -31,7 +31,7 @@ fi
 warn ${BUILDDIR}
 warn ${CACHEDIR}
 
-if [[ ! -f ${BUILDDIR}/dockerize ]]: then
+if [[ ! -f ${BUILDDIR}/dockerize ]]; then
 	start "Installing dockerize"
 	mkdir ${BUILDDIR}/bin
 	cd ${BUILDDIR}/bin
