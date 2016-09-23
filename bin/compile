@@ -62,4 +62,5 @@ finished
 echo -e "---\ndefault_process_types:\n  web: logstash-${VERSION}/bin/logstash -f ${BUILDDIR}/logstash.conf" >> ${BUILDDIR}/buildpack-release-step.yml
 
 mkdir -p ${BUILDDIR}/.profile.d
-echo 'JAVA_HOME=${HOME}/openjdk' > ${BUILDDIR}/.profile.d/logstash.sh
+echo 'JAVA_HOME=$HOME/openjdk' > ${BUILDDIR}/.profile.d/openjdk.sh
+echo 'PATH=$PATH:$HOME/openjdk/bin' > ${BUILDDIR}/.profile.d/path.sh
