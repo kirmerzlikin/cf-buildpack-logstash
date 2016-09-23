@@ -31,11 +31,13 @@ fi
 warn ${BUILDDIR}
 warn ${CACHEDIR}
 
-#start "Installing dockerize"
-#mkdir ${BUILDDIR}/bin
-#cd ${BUILDDIR}/bin
-#${CURL} ${DOCKERIZE_URL} | tar zxf -
-#finished
+if [[ ! -f ${BUILDDIR}/dockerize ]]: then
+	start "Installing dockerize"
+	mkdir ${BUILDDIR}/bin
+	cd ${BUILDDIR}/bin
+	${CURL} ${DOCKERIZE_URL} | tar zxf -
+	finished
+fi
 
 if [[ ! -d ${BUILDDIR}/openjdk ]]; then
 	start "Installing openjdk"
@@ -54,13 +56,23 @@ if [[ ! -d ${BUILDDIR}/logstash-${VERSION} ]]; then
 	echo "downloaded ${LOGSTASH_URL}"
 fi
 
-export JAVA_HOME="${BUILDDIR}/openjdk"
-start "Check Logstash configuration"
-${BUILDDIR}/logstash-${VERSION}/bin/logstash -f ${BUILDDIR}/logstash.conf -t >/dev/null
-finished
+mkdir ${BUILDDIR}/conf.d
 
-echo -e "---\ndefault_process_types:\n  web: logstash-${VERSION}/bin/logstash -f logstash.conf" >> ${BUILDDIR}/buildpack-release-step.yml
+#export JAVA_HOME="${BUILDDIR}/openjdk"
+#start "Check Logstash configuration"
+#${BUILDDIR}/logstash-${VERSION}/bin/logstash -f ${BUILDDIR}/logstash.conf -t >/dev/null
+#finished
+
+echo "Port: $PORT"
+echo "User: $LOGSTASH_USER"
+echo "Password: $LOGSTASH_PASSWORD"
+
+cat << EOF >> ${BUILDDIR}/buildpack-release-step.yml
+---
+default_process_types:
+  web: dockerize -template logstash.conf:conf.d/logstash.conf logstash-${VERSION}/bin/logstash -f conf.d/logstash.conf
+EOF
 
 mkdir -p ${BUILDDIR}/.profile.d
 echo 'JAVA_HOME=$HOME/openjdk' > ${BUILDDIR}/.profile.d/openjdk.sh
-echo 'PATH=$PATH:$HOME/openjdk/bin' > ${BUILDDIR}/.profile.d/path.sh
+echo 'PATH=$PATH:$HOME/bin:$HOME/openjdk/bin' > ${BUILDDIR}/.profile.d/path.sh
