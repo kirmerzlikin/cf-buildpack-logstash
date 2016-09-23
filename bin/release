@@ -3,6 +3,8 @@
 set -euo pipefail # Enable bash strict mode (http://redsymbol.net/articles/unofficial-bash-strict-mode/)
 set -x # debug
 
+BP=$(dirname $(dirname $0))
+
 source $BP/bin/functions.sh
 
 if [[ -z "${1:-}" ]]; then
