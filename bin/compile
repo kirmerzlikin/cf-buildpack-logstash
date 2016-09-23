@@ -58,6 +58,21 @@ fi
 
 mkdir ${BUILDDIR}/conf.d
 
+#export JAVA_HOME="${BUILDDIR}/openjdk"
+#start "Check Logstash configuration"
+#${BUILDDIR}/logstash-${VERSION}/bin/logstash -f ${BUILDDIR}/logstash.conf -t >/dev/null
+#finished
+
+echo "Port: ${PORT:-}"
+echo "User: ${LOGSTASH_USER:-}"
+echo "Password: ${LOGSTASH_PASSWORD:-}"
+
+cat << EOF >> ${BUILDDIR}/buildpack-release-step.yml
+---
+default_process_types:
+  web: dockerize -template logstash.conf:conf.d/logstash.conf logstash-${VERSION}/bin/logstash -f conf.d/logstash.conf
+EOF
+
 mkdir -p ${BUILDDIR}/.profile.d
 echo 'JAVA_HOME=$HOME/openjdk' > ${BUILDDIR}/.profile.d/openjdk.sh
 echo 'PATH=$PATH:$HOME/bin:$HOME/openjdk/bin' > ${BUILDDIR}/.profile.d/path.sh
