@@ -56,16 +56,14 @@ if [[ ! -d ${BUILDDIR}/logstash-${VERSION} ]]; then
 	echo "downloaded ${LOGSTASH_URL}"
 fi
 
+mkdir ${CACHEDIR}/conf.d
+
+export JAVA_HOME="${BUILDDIR}/openjdk"
+start "Check Logstash configuration"
+${BUILDDIR}/dockerize -template ${BUILDDIR}/logstash.conf:${CACHEDIR}/conf.d/logstash.conf ${BUILDDIR}/logstash-${VERSION}/bin/logstash -f ${CACHEDIR}/conf.d/logstash.conf -t >/dev/null
+finished
+
 mkdir ${BUILDDIR}/conf.d
-
-#export JAVA_HOME="${BUILDDIR}/openjdk"
-#start "Check Logstash configuration"
-#${BUILDDIR}/logstash-${VERSION}/bin/logstash -f ${BUILDDIR}/logstash.conf -t >/dev/null
-#finished
-
-echo "Port: ${PORT:-}"
-echo "User: ${LOGSTASH_USER:-}"
-echo "Password: ${LOGSTASH_PASSWORD:-}"
 
 cat << EOF >> ${BUILDDIR}/buildpack-release-step.yml
 ---
