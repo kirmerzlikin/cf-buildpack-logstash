@@ -54,7 +54,7 @@ if [[ ! -d ${BUILDDIR}/logstash-${VERSION} ]]; then
 	echo "downloaded ${LOGSTASH_URL}"
 fi
 
-mkdir ${CACHEDIR}/conf.d
+mkdir -p ${CACHEDIR}/conf.d
 
 export JAVA_HOME="${BUILDDIR}/openjdk"
 start "Check Logstash configuration"
