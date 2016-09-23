@@ -1,0 +1,51 @@
+#!/bin/bash
+# usage: bin/compile <build-dir> <cache-dir>
+set -euo pipefail # Enable bash strict mode (http://redsymbol.net/articles/unofficial-bash-strict-mode/)
+set -x # debug
+
+BP=$(dirname $(dirname $0))
+VERSION=`cat ${BP}/VERSION`
+LOGSTASH_URL="https://download.elastic.co/logstash/logstash/logstash-${VERSION}.tar.gz"
+DOCKERIZE_URL="https://github.com/jwilder/dockerize/releases/download/v0.2.0/dockerize-linux-amd64-v0.2.0.tar.gz"
+
+source $BP/bin/functions.sh
+
+if [[ -z "${1:-}" ]]; then
+	err "Missing argument <build-dir>"
+	exit 1
+fi
+BUILDDIR=$(cd "${1:-}/" && pwd)
+
+if [[ -z "${2:-}" ]]; then
+	err "Missing argument <cache-dir>"
+	exit 1
+fi
+CACHEDIR=$(cd "${2:-}" && pwd)
+
+if [[ ! -f "${BUILDDIR}/Logstash" ]]; then
+	err "${BUILDDIR}/Logstash not found."
+	exit 1;
+fi
+
+warn ${BUILDDIR}
+warn ${CACHEDIR}
+
+#start "Installing dockerize"
+#mkdir ${BUILDDIR}/bin
+#cd ${BUILDDIR}/bin
+#${CURL} ${DOCKERIZE_URL} | tar zxf -
+#finished
+
+if [[ ! -d ${BUILDDIR}/logstash-${VERSION} ]]; then
+	start "Installing Logstash ${VERSION}"
+	cd ${BUILDDIR}
+	${CURL} ${LOGSTASH_URL} | tar zxf -
+	finished
+	echo "downloaded ${LOGSTASH_URL}"
+fi
+
+start "Check Logstash configuration"
+${BUILDDIR}/logstash-${VERSION}/bin/logstash -f ${BUILDDIR}/logstash.conf -t >/dev/null
+finished
+
+echo -e "---\ndefault_process_types:\n  web: ${BUILDDIR}$/logstash-${VERSION}/bin/logstash -f ${BUILDDIR}/logstash.conf" >> ${BUILDDIR}/buildpack-release-step.yml

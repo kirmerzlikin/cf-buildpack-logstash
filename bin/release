@@ -1,0 +1,14 @@
+#!/bin/bash
+# usage: bin/compile <build-dir> <cache-dir>
+set -euo pipefail # Enable bash strict mode (http://redsymbol.net/articles/unofficial-bash-strict-mode/)
+set -x # debug
+
+source $BP/bin/functions.sh
+
+if [[ -z "${1:-}" ]]; then
+	err "Missing argument <build-dir>"
+	exit 1
+fi
+BUILDDIR=$(cd "${1:-}/" && pwd)
+
+echo "$(cat ${BUILDDIR}/buildpack-release-step.yml)"

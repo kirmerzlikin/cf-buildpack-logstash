@@ -1,0 +1,23 @@
+---
+language: logstash
+default_versions:
+  - name: logstash
+    version: 2.4.0
+url_to_dependency_map:
+  - match: logstash-(\d+\.\d+\.\d+)
+    name: logstash
+    version: $1
+
+dependencies:
+  - name: logstash
+    version: 2.4.0
+    uri: https://download.elastic.co/logstash/logstash/logstash-2.4.0.tar.gz
+    md5: 2364b354274b59f45b324d341329b042
+    cf_stacks:
+      - lucid64
+      - cflinuxfs2
+
+
+exclude_files:
+  - .git
+  - .gitignore
