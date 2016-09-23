@@ -1,7 +1,7 @@
 #!/bin/bash
 # usage: bin/compile <build-dir> <cache-dir>
 set -euo pipefail # Enable bash strict mode (http://redsymbol.net/articles/unofficial-bash-strict-mode/)
-set -x # debug
+#set -x # debug
 
 BP=$(dirname $(dirname $0))
 

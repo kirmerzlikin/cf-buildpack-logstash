@@ -1,7 +1,7 @@
 #!/bin/bash
 # usage: bin/compile <build-dir> <cache-dir>
 set -euo pipefail # Enable bash strict mode (http://redsymbol.net/articles/unofficial-bash-strict-mode/)
-set -x # debug
+#set -x # debug
 
 BP=$(dirname $(dirname $0))
 VERSION=`cat ${BP}/VERSION`
@@ -28,15 +28,13 @@ if [[ ! -f "${BUILDDIR}/Logstash" ]]; then
 	exit 1;
 fi
 
-warn ${BUILDDIR}
-warn ${CACHEDIR}
-
 if [[ ! -f ${BUILDDIR}/dockerize ]]; then
 	start "Installing dockerize"
 	mkdir ${BUILDDIR}/bin
 	cd ${BUILDDIR}/bin
 	${CURL} ${DOCKERIZE_URL} | tar zxf -
 	finished
+	echo "downloaded ${DOCKERIZE_URL}"
 fi
 
 if [[ ! -d ${BUILDDIR}/openjdk ]]; then
