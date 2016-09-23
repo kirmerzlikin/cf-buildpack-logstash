@@ -1,8 +1,10 @@
 ---
 language: logstash
+
 default_versions:
   - name: logstash
     version: 2.4.0
+
 url_to_dependency_map:
   - match: logstash-(\d+\.\d+\.\d+)
     name: logstash
@@ -16,7 +18,13 @@ dependencies:
     cf_stacks:
       - lucid64
       - cflinuxfs2
-
+  - name: openjdk
+    version: 1.7.0
+    uri: https://java-buildpack.cloudfoundry.org/openjdk-jdk/trusty/x86_64/openjdk-1.7.0_51.tar.gz
+    md5: 4c89bf00090082c438fed7c40e453ed2
+    cf_stacks:
+      - lucid64
+      - cflinuxfs2
 
 exclude_files:
   - .git

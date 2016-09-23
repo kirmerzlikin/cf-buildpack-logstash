@@ -5,6 +5,7 @@ set -x # debug
 
 BP=$(dirname $(dirname $0))
 VERSION=`cat ${BP}/VERSION`
+OPENJDK_URL="https://java-buildpack.cloudfoundry.org/openjdk-jdk/trusty/x86_64/openjdk-1.7.0_51.tar.gz"
 LOGSTASH_URL="https://download.elastic.co/logstash/logstash/logstash-${VERSION}.tar.gz"
 DOCKERIZE_URL="https://github.com/jwilder/dockerize/releases/download/v0.2.0/dockerize-linux-amd64-v0.2.0.tar.gz"
 
@@ -30,15 +31,20 @@ fi
 warn ${BUILDDIR}
 warn ${CACHEDIR}
 
-start "Installing jre"
-apt install default-jre
-finished
-
 #start "Installing dockerize"
 #mkdir ${BUILDDIR}/bin
 #cd ${BUILDDIR}/bin
 #${CURL} ${DOCKERIZE_URL} | tar zxf -
 #finished
+
+if [[ ! -d ${BUILDDIR}/openjdk ]]; then
+	start "Installing openjdk"
+	mkdir -p ${BUILDDIR}/openjdk
+	cd ${BUILDDIR}/openjdk
+	${CURL} ${OPENJDK_URL} | tar zxf -
+	finished
+	echo "downloaded ${OPENJDK_URL}"
+fi
 
 if [[ ! -d ${BUILDDIR}/logstash-${VERSION} ]]; then
 	start "Installing Logstash ${VERSION}"
@@ -48,8 +54,12 @@ if [[ ! -d ${BUILDDIR}/logstash-${VERSION} ]]; then
 	echo "downloaded ${LOGSTASH_URL}"
 fi
 
+export JAVA_HOME="${BUILDDIR}/openjdk"
 start "Check Logstash configuration"
 ${BUILDDIR}/logstash-${VERSION}/bin/logstash -f ${BUILDDIR}/logstash.conf -t >/dev/null
 finished
 
 echo -e "---\ndefault_process_types:\n  web: ${BUILDDIR}$/logstash-${VERSION}/bin/logstash -f ${BUILDDIR}/logstash.conf" >> ${BUILDDIR}/buildpack-release-step.yml
+
+mkdir -p ${BUILDDIR}/.profile.d
+echo "JAVA_HOME=${BUILDDIR}/openjdk" > ${BUILDDIR}/.profile.d/logstash.sh
