@@ -1,14 +1,28 @@
 #!/bin/bash
 # usage: bin/compile <build-dir> <cache-dir>
-set -euo pipefail # Enable bash strict mode (http://redsymbol.net/articles/unofficial-bash-strict-mode/)
-set -x # debug
+BP=$(dirname $(dirname $0))
+source $BP/bin/functions.sh
 
+if [[ -z "${1:-}" ]]; then
+	err "Missing argument <build-dir>"
+fi
+BUILDDIR=$(cd "${1:-}/" && pwd)
+
+if [[ -z "${2:-}" ]]; then
+	err "Missing argument <cache-dir>"
+fi
+CACHEDIR=$(cd "${2:-}" && pwd)
+
+if [[ ! -f "${BUILDDIR}/Logstash" ]]; then
+	err "${BUILDDIR}/Logstash not found."
+fi
+
+# Source ubuntu distribution information
 if [[ -f "/etc/lsb-release" ]]; then
 	source /etc/lsb-release
 fi
 
-BP=$(dirname $(dirname $0))
-LOGSTASH_VERSION=`cat ${BP}/VERSION`
+LOGSTASH_VERSION=$(cat ${BP}/VERSION)
 LOGSTASH_FILE="logstash-${LOGSTASH_VERSION}.tar.gz"
 LOGSTASH_URL="https://download.elastic.co/logstash/logstash/${LOGSTASH_FILE}"
 SHA1_EXT=".sha1.txt"
@@ -16,25 +30,6 @@ OPENJDK_VERSION="1.7.0_51"
 OPENJDK_URL="https://java-buildpack.cloudfoundry.org/openjdk-jdk/${DISTRIB_CODENAME:-trusty}/x86_64/openjdk-${OPENJDK_VERSION}.tar.gz"
 DOCKERIZE_VERSION="v0.2.1-jsonQuery"
 DOCKERIZE_URL="https://github.com/breml/dockerize/releases/download/v0.2.1-jsonQuery/dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz"
-
-source $BP/bin/functions.sh
-
-if [[ -z "${1:-}" ]]; then
-	err "Missing argument <build-dir>"
-	exit 1
-fi
-BUILDDIR=$(cd "${1:-}/" && pwd)
-
-if [[ -z "${2:-}" ]]; then
-	err "Missing argument <cache-dir>"
-	exit 1
-fi
-CACHEDIR=$(cd "${2:-}" && pwd)
-
-if [[ ! -f "${BUILDDIR}/Logstash" ]]; then
-	err "${BUILDDIR}/Logstash not found."
-	exit 1;
-fi
 
 if [[ ! -f ${BUILDDIR}/dockerize ]]; then
 	start "Installing dockerize"

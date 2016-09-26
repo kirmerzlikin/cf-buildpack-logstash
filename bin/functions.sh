@@ -1,4 +1,7 @@
 #!/bin/bash
+set -euo pipefail # Enable bash strict mode (http://redsymbol.net/articles/unofficial-bash-strict-mode/)
+set -x # debug
+
 steptxt="----->"
 YELLOW='\033[1;33m'
 RED='\033[1;31m'
@@ -11,6 +14,7 @@ warn() {
 
 err() {
     echo -e >&2 "${RED} !!    $@${NC}"
+    exit 1
 }
 
 step() {

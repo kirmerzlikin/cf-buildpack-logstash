@@ -1,20 +1,16 @@
 #!/bin/bash
 # usage: bin/detect <build-dir>
-set -euo pipefail # Enable bash strict mode (http://redsymbol.net/articles/unofficial-bash-strict-mode/)
-#set -x # debug
-
 BP=$(dirname $(dirname $0))
-LOGSTASH_VERSION=`cat ${BP}/VERSION`
+source $BP/bin/functions.sh
 
 if [[ -z "${1:-}" ]]; then
 	echo "Missing argument <build-dir>"
-	exit 1
 fi
 BUILD=$(cd "${1:-}/" && pwd)
 
 if [[ ! -f "${BUILD}/Logstash" ]]; then
-	exit 1;
+	exit 1
 fi
 
-echo "logstash ${LOGSTASH_VERSION}"
+echo "Logstash Application"
 exit 0
