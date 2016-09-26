@@ -59,7 +59,7 @@ if [[ ! -d ${BUILDDIR}/logstash-${LOGSTASH_VERSION} ]]; then
 	${CURL} -o ${CACHEDIR}/${LOGSTASH_FILE} ${LOGSTASH_URL}
 	# Validate SHA1
 	${CURL} -o ${CACHEDIR}/${LOGSTASH_FILE}${SHA1_EXT} ${LOGSTASH_URL}${SHA1_EXT}
-	sha1sum --check ${CACHEDIR}/${LOGSTASH_FILE}
+	sha1sum --check ${CACHEDIR}/${LOGSTASH_FILE}${SHA1_EXT}
 	tar -zx -C ${BUILDDIR} -f ${CACHEDIR}/${LOGSTASH_FILE}
 	finished
 	echo "downloaded ${LOGSTASH_URL}"
