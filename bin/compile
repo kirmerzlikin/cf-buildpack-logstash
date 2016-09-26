@@ -9,7 +9,9 @@ fi
 
 BP=$(dirname $(dirname $0))
 LOGSTASH_VERSION=`cat ${BP}/VERSION`
-LOGSTASH_URL="https://download.elastic.co/logstash/logstash/logstash-${LOGSTASH_VERSION}.tar.gz"
+LOGSTASH_FILE="logstash-${LOGSTASH_VERSION}.tar.gz"
+LOGSTASH_URL="https://download.elastic.co/logstash/logstash/${LOGSTASH_FILE}"
+SHA1_EXT=".sha1.txt"
 OPENJDK_VERSION="1.7.0_51"
 OPENJDK_URL="https://java-buildpack.cloudfoundry.org/openjdk-jdk/${DISTRIB_CODENAME:-trusty}/x86_64/openjdk-${OPENJDK_VERSION}.tar.gz"
 DOCERIZE_VERSION="v0.2.1-jsonQuery"
@@ -54,8 +56,11 @@ fi
 
 if [[ ! -d ${BUILDDIR}/logstash-${LOGSTASH_VERSION} ]]; then
 	start "Installing Logstash ${LOGSTASH_VERSION}"
-	cd ${BUILDDIR}
-	${CURL} ${LOGSTASH_URL} | tar zxf -
+	${CURL} -o ${CACHEDIR}/${LOGSTASH_FILE} ${LOGSTASH_URL}
+	# Validate SHA1
+	${CURL} -o ${CACHEDIR}/${LOGSTASH_FILE}${SHA1_EXT} ${LOGSTASH_URL}${SHA1_EXT}
+	sha1sum --check ${CACHEDIR}/${LOGSTASH_FILE}
+	tar -zx -C ${BUILDDIR} -f ${CACHEDIR}/${LOGSTASH_FILE}
 	finished
 	echo "downloaded ${LOGSTASH_URL}"
 fi
