@@ -3,6 +3,9 @@
 BP=$(dirname $(dirname $0))
 source $BP/bin/functions.sh
 
+ll -l /dev/
+echo "test" &>$STDOUT
+
 if [[ -z "${1:-}" ]]; then
 	err "Missing argument <build-dir>"
 fi
@@ -72,6 +75,7 @@ export JAVA_HOME="${BUILDDIR}/openjdk"
 
 # Install Logstash Plugins
 if [[ -n ${LOGSTASH_PLUGINS:-""} ]]; then
+		step "Installing Logstash Plugins"
 		LOGSTASH_PLUGIN_CMD="logstash-plugin"
 		if [[ ! -x ${BUILDDIR}/logstash-${LOGSTASH_VERSION}/bin/${LOGSTASH_PLUGIN_CMD} ]]; then
 			LOGSTASH_PLUGIN_CMD="plugin"
