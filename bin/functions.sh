@@ -3,7 +3,7 @@ set -euo pipefail # Enable bash strict mode (http://redsymbol.net/articles/unoff
 STDOUT=/dev/null
 if [[ ${DEBUG:-0} -eq 1 ]]; then
 	set -x # DEBUG
-	STDOUT=$(readlink /proc/"$$"/fd/1)
+	STDOUT="&1"
 fi
 
 steptxt="----->"
