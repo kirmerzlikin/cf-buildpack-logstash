@@ -1,6 +1,8 @@
 #!/bin/bash
 set -euo pipefail # Enable bash strict mode (http://redsymbol.net/articles/unofficial-bash-strict-mode/)
-set -x # debug
+if [[ ${DEBUG:-0} -eq 1 ]]; then
+	set -x # DEBUG
+fi
 
 steptxt="----->"
 YELLOW='\033[1;33m'
