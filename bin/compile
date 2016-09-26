@@ -73,7 +73,7 @@ fi
 if [[ -n ${LOGSTASH_PLUGINS:-""} ]]; then
         for PLUGIN in "${LOGSTASH_PLUGINS[@]}"; do
                 start "Installing Logstash Plugin ${PLUGIN}"
-                ${BUILDDIR}/logstash-${LOGSTASH_VERSION}/bin/logstash-plugin ${PLUGIN}
+                ${BUILDDIR}/logstash-${LOGSTASH_VERSION}/bin/logstash-plugin install ${PLUGIN}
                 finished
         done
 fi
