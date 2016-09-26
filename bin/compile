@@ -3,11 +3,17 @@
 set -euo pipefail # Enable bash strict mode (http://redsymbol.net/articles/unofficial-bash-strict-mode/)
 #set -x # debug
 
+if [[ -f "/etc/lsb-release" ]]; then
+	source /etc/lsb-release
+fi
+
 BP=$(dirname $(dirname $0))
-VERSION=`cat ${BP}/VERSION`
-OPENJDK_URL="https://java-buildpack.cloudfoundry.org/openjdk-jdk/trusty/x86_64/openjdk-1.7.0_51.tar.gz"
-LOGSTASH_URL="https://download.elastic.co/logstash/logstash/logstash-${VERSION}.tar.gz"
-DOCKERIZE_URL="https://github.com/breml/dockerize/releases/download/v0.2.1-jsonQuery/dockerize-linux-amd64-v0.2.1-jsonQuery.tar.gz"
+LOGSTASH_VERSION=`cat ${BP}/VERSION`
+LOGSTASH_URL="https://download.elastic.co/logstash/logstash/logstash-${LOGSTASH_VERSION}.tar.gz"
+OPENJDK_VERSION="1.7.0_51"
+OPENJDK_URL="https://java-buildpack.cloudfoundry.org/openjdk-jdk/${DISTRIB_CODENAME:-trusty}/x86_64/openjdk-${OPENJDK_VERSION}.tar.gz"
+DOCERIZE_VERSION="v0.2.1-jsonQuery"
+DOCKERIZE_URL="https://github.com/breml/dockerize/releases/download/v0.2.1-jsonQuery/dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz"
 
 source $BP/bin/functions.sh
 
@@ -46,8 +52,8 @@ if [[ ! -d ${BUILDDIR}/openjdk ]]; then
 	echo "downloaded ${OPENJDK_URL}"
 fi
 
-if [[ ! -d ${BUILDDIR}/logstash-${VERSION} ]]; then
-	start "Installing Logstash ${VERSION}"
+if [[ ! -d ${BUILDDIR}/logstash-${LOGSTASH_VERSION} ]]; then
+	start "Installing Logstash ${LOGSTASH_VERSION}"
 	cd ${BUILDDIR}
 	${CURL} ${LOGSTASH_URL} | tar zxf -
 	finished
@@ -58,7 +64,7 @@ mkdir -p ${CACHEDIR}/conf.d
 
 export JAVA_HOME="${BUILDDIR}/openjdk"
 start "Check Logstash configuration"
-${BUILDDIR}/bin/dockerize -template ${BUILDDIR}/logstash.conf:${CACHEDIR}/conf.d/logstash.conf ${BUILDDIR}/logstash-${VERSION}/bin/logstash -f ${CACHEDIR}/conf.d/logstash.conf -t >/dev/null
+${BUILDDIR}/bin/dockerize -template ${BUILDDIR}/logstash.conf:${CACHEDIR}/conf.d/logstash.conf ${BUILDDIR}/logstash-${LOGSTASH_VERSION}/bin/logstash -f ${CACHEDIR}/conf.d/logstash.conf -t >/dev/null
 finished
 
 mkdir ${BUILDDIR}/conf.d
@@ -66,7 +72,7 @@ mkdir ${BUILDDIR}/conf.d
 cat << EOF >> ${BUILDDIR}/buildpack-release-step.yml
 ---
 default_process_types:
-  web: dockerize -template logstash.conf:conf.d/logstash.conf logstash-${VERSION}/bin/logstash -f conf.d/logstash.conf
+  web: dockerize -template logstash.conf:conf.d/logstash.conf logstash-${LOGSTASH_VERSION}/bin/logstash -f conf.d/logstash.conf
 EOF
 
 mkdir -p ${BUILDDIR}/.profile.d

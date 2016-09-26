@@ -4,7 +4,7 @@ set -euo pipefail # Enable bash strict mode (http://redsymbol.net/articles/unoff
 #set -x # debug
 
 BP=$(dirname $(dirname $0))
-VERSION=`cat ${BP}/VERSION`
+LOGSTASH_VERSION=`cat ${BP}/VERSION`
 
 if [[ -z "${1:-}" ]]; then
 	echo "Missing argument <build-dir>"
@@ -16,5 +16,5 @@ if [[ ! -f "${BUILD}/Logstash" ]]; then
 	exit 1;
 fi
 
-echo "logstash ${VERSION}"
+echo "logstash ${LOGSTASH_VERSION}"
 exit 0
