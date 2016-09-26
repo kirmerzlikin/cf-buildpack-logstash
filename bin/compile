@@ -61,7 +61,7 @@ if [[ ! -d ${BUILDDIR}/logstash-${LOGSTASH_VERSION} ]]; then
 
 	${CURL} -o "${CACHEDIR}/${LOGSTASH_FILE}${SHA1_EXT}" "${LOGSTASH_URL}${SHA1_EXT}"
 	cd ${CACHEDIR}
-	sha1sum --check ${CACHEDIR}/${LOGSTASH_FILE}${SHA1_EXT} &>/dev/null
+	sha1sum --check ${CACHEDIR}/${LOGSTASH_FILE}${SHA1_EXT} &>$STDOUT
 
 	tar -zx -C ${BUILDDIR} -f ${CACHEDIR}/${LOGSTASH_FILE}
 	finished
@@ -78,7 +78,7 @@ if [[ -n ${LOGSTASH_PLUGINS:-""} ]]; then
 		fi
         for PLUGIN in "${LOGSTASH_PLUGINS[@]}"; do
                 start "Installing Logstash Plugin ${PLUGIN}"
-                ${BUILDDIR}/logstash-${LOGSTASH_VERSION}/bin/${LOGSTASH_PLUGIN_CMD} install ${PLUGIN}
+                ${BUILDDIR}/logstash-${LOGSTASH_VERSION}/bin/${LOGSTASH_PLUGIN_CMD} install ${PLUGIN} &>$STDOUT
                 finished
         done
 fi
@@ -88,7 +88,7 @@ if [[ ${LOGSTASH_CONFIG_CHECK} -eq 1 ]]; then
 	mkdir -p ${CACHEDIR}/conf.d
 
 	start "Check Logstash configuration"
-	${BUILDDIR}/bin/dockerize -template ${BUILDDIR}/logstash.conf:${CACHEDIR}/conf.d/logstash.conf ${BUILDDIR}/logstash-${LOGSTASH_VERSION}/bin/logstash -f ${CACHEDIR}/conf.d/logstash.conf -t >/dev/null
+	${BUILDDIR}/bin/dockerize -template ${BUILDDIR}/logstash.conf:${CACHEDIR}/conf.d/logstash.conf ${BUILDDIR}/logstash-${LOGSTASH_VERSION}/bin/logstash -f ${CACHEDIR}/conf.d/logstash.conf -t &>>$STDOUT
 	finished
 fi
 
