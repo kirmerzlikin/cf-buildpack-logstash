@@ -44,7 +44,7 @@ if [[ ! -f ${BUILDDIR}/dockerize ]]; then
 	cd ${BUILDDIR}/bin
 	${CURL} ${DOCKERIZE_URL} | tar zxf -
 	finished
-	echo "downloaded ${DOCKERIZE_URL}"
+	step "downloaded ${DOCKERIZE_URL}"
 fi
 
 if [[ ! -d ${BUILDDIR}/openjdk ]]; then
@@ -53,7 +53,7 @@ if [[ ! -d ${BUILDDIR}/openjdk ]]; then
 	cd ${BUILDDIR}/openjdk
 	${CURL} ${OPENJDK_URL} | tar zxf -
 	finished
-	echo "downloaded ${OPENJDK_URL}"
+	step "downloaded ${OPENJDK_URL}"
 fi
 
 if [[ ! -d ${BUILDDIR}/logstash-${LOGSTASH_VERSION} ]]; then
@@ -62,11 +62,11 @@ if [[ ! -d ${BUILDDIR}/logstash-${LOGSTASH_VERSION} ]]; then
 
 	${CURL} -o "${CACHEDIR}/${LOGSTASH_FILE}${SHA1_EXT}" "${LOGSTASH_URL}${SHA1_EXT}"
 	cd ${CACHEDIR}
-	sha1sum --check ${CACHEDIR}/${LOGSTASH_FILE}${SHA1_EXT}
+	sha1sum --check ${CACHEDIR}/${LOGSTASH_FILE}${SHA1_EXT} &>/dev/null
 
 	tar -zx -C ${BUILDDIR} -f ${CACHEDIR}/${LOGSTASH_FILE}
 	finished
-	echo "downloaded ${LOGSTASH_URL}"
+	step "downloaded ${LOGSTASH_URL}"
 fi
 
 # Install Logstash Plugins
