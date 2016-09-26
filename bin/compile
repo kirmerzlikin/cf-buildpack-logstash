@@ -5,6 +5,7 @@ source $BP/bin/functions.sh
 
 ls -l /dev/
 ls -l /proc/self/fd
+ls -l /proc/$$/fd
 echo "test" &>$STDOUT
 
 if [[ -z "${1:-}" ]]; then
