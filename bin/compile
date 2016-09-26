@@ -14,7 +14,7 @@ LOGSTASH_URL="https://download.elastic.co/logstash/logstash/${LOGSTASH_FILE}"
 SHA1_EXT=".sha1.txt"
 OPENJDK_VERSION="1.7.0_51"
 OPENJDK_URL="https://java-buildpack.cloudfoundry.org/openjdk-jdk/${DISTRIB_CODENAME:-trusty}/x86_64/openjdk-${OPENJDK_VERSION}.tar.gz"
-DOCERIZE_VERSION="v0.2.1-jsonQuery"
+DOCKERIZE_VERSION="v0.2.1-jsonQuery"
 DOCKERIZE_URL="https://github.com/breml/dockerize/releases/download/v0.2.1-jsonQuery/dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz"
 
 source $BP/bin/functions.sh
