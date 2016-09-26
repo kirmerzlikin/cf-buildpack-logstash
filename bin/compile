@@ -73,9 +73,13 @@ export JAVA_HOME="${BUILDDIR}/openjdk"
 
 # Install Logstash Plugins
 if [[ -n ${LOGSTASH_PLUGINS:-""} ]]; then
+		LOGSTASH_PLUGIN_CMD="logstash-plugin"
+		if [[ ! -x ${BUILDDIR}/logstash-${LOGSTASH_VERSION}/bin/${LOGSTASH_PLUGIN_CMD} ]]; then
+			LOGSTASH_PLUGIN_CMD="plugin"
+		fi
         for PLUGIN in "${LOGSTASH_PLUGINS[@]}"; do
                 start "Installing Logstash Plugin ${PLUGIN}"
-                ${BUILDDIR}/logstash-${LOGSTASH_VERSION}/bin/logstash-plugin install ${PLUGIN}
+                ${BUILDDIR}/logstash-${LOGSTASH_VERSION}/bin/${LOGSTASH_PLUGIN_CMD} install ${PLUGIN}
                 finished
         done
 fi
