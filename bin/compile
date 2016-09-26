@@ -17,6 +17,11 @@ if [[ ! -f "${BUILDDIR}/Logstash" ]]; then
 	err "${BUILDDIR}/Logstash not found."
 fi
 
+# Source ubuntu distribution information
+if [[ -f "/etc/lsb-release" ]]; then
+	source /etc/lsb-release
+fi
+
 source ${BUILDDIR}/Logstash
 
 # Default Values
@@ -31,11 +36,6 @@ OPENJDK_VERSION=${OPENJDK_VERSION:-"1.7.0_51"}
 OPENJDK_URL=${OPENJDK_URL:-"https://java-buildpack.cloudfoundry.org/openjdk-jdk/${DISTRIB_CODENAME:-trusty}/x86_64/openjdk-${OPENJDK_VERSION}.tar.gz"}
 DOCKERIZE_VERSION=${DOCKERIZE_VERSION:-"v0.2.1-jsonQuery"}
 DOCKERIZE_URL=${DOCKERIZE_URL:-"https://github.com/breml/dockerize/releases/download/v0.2.1-jsonQuery/dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz"}
-
-# Source ubuntu distribution information
-if [[ -f "/etc/lsb-release" ]]; then
-	source /etc/lsb-release
-fi
 
 if [[ ! -f ${BUILDDIR}/dockerize ]]; then
 	start "Installing dockerize"
