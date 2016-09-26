@@ -17,21 +17,20 @@ if [[ ! -f "${BUILDDIR}/Logstash" ]]; then
 	err "${BUILDDIR}/Logstash not found."
 fi
 
-# Default Values
-LOGSTASH_CMD_ARGS=""
-LOGSTASH_PLUGINS=()
-LOGSTASH_CONFIG_CHECK=1
-
-LOGSTASH_VERSION=$(cat ${BP}/VERSION)
-LOGSTASH_FILE="logstash-${LOGSTASH_VERSION}.tar.gz"
-LOGSTASH_URL="https://download.elastic.co/logstash/logstash/${LOGSTASH_FILE}"
-SHA1_EXT=".sha1.txt"
-OPENJDK_VERSION="1.7.0_51"
-OPENJDK_URL="https://java-buildpack.cloudfoundry.org/openjdk-jdk/${DISTRIB_CODENAME:-trusty}/x86_64/openjdk-${OPENJDK_VERSION}.tar.gz"
-DOCKERIZE_VERSION="v0.2.1-jsonQuery"
-DOCKERIZE_URL="https://github.com/breml/dockerize/releases/download/v0.2.1-jsonQuery/dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz"
-
 source ${BUILDDIR}/Logstash
+
+# Default Values
+LOGSTASH_CMD_ARGS=${LOGSTASH_CMD_ARGS:-""}
+LOGSTASH_PLUGINS=${LOGSTASH_PLUGINS:-()}
+LOGSTASH_CONFIG_CHECK=${LOGSTASH_CONFIG_CHECK:-1}
+LOGSTASH_VERSION=${LOGSTASH_VERSION:-$(cat ${BP}/VERSION)}
+LOGSTASH_FILE=${LOGSTASH_FILE:-"logstash-${LOGSTASH_VERSION}.tar.gz"}
+LOGSTASH_URL=${LOGSTASH_URL:-"https://download.elastic.co/logstash/logstash/${LOGSTASH_FILE}"}
+SHA1_EXT=${SHA1_EXT:-".sha1.txt"}
+OPENJDK_VERSION=${OPENJDK_VERSION:-"1.7.0_51"}
+OPENJDK_URL=${OPENJDK_URL:-"https://java-buildpack.cloudfoundry.org/openjdk-jdk/${DISTRIB_CODENAME:-trusty}/x86_64/openjdk-${OPENJDK_VERSION}.tar.gz"}
+DOCKERIZE_VERSION=${DOCKERIZE_VERSION:-"v0.2.1-jsonQuery"}
+DOCKERIZE_URL=${DOCKERIZE_URL:-"https://github.com/breml/dockerize/releases/download/v0.2.1-jsonQuery/dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz"}
 
 # Source ubuntu distribution information
 if [[ -f "/etc/lsb-release" ]]; then
