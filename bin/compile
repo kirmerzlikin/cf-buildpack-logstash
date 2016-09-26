@@ -3,10 +3,7 @@
 BP=$(dirname $(dirname $0))
 source $BP/bin/functions.sh
 
-ls -l /dev/
-ls -l /proc/self/fd
-ls -l /proc/$$/fd
-echo "test" &>$STDOUT
+echo "test" &>&3
 
 if [[ -z "${1:-}" ]]; then
 	err "Missing argument <build-dir>"
@@ -66,7 +63,7 @@ if [[ ! -d ${BUILDDIR}/logstash-${LOGSTASH_VERSION} ]]; then
 
 	${CURL} -o "${CACHEDIR}/${LOGSTASH_FILE}${SHA1_EXT}" "${LOGSTASH_URL}${SHA1_EXT}"
 	cd ${CACHEDIR}
-	sha1sum --check ${CACHEDIR}/${LOGSTASH_FILE}${SHA1_EXT} &>$STDOUT
+	sha1sum --check ${CACHEDIR}/${LOGSTASH_FILE}${SHA1_EXT} &>&3
 
 	tar -zx -C ${BUILDDIR} -f ${CACHEDIR}/${LOGSTASH_FILE}
 	finished
@@ -84,7 +81,7 @@ if [[ -n ${LOGSTASH_PLUGINS:-""} ]]; then
 		fi
         for PLUGIN in "${LOGSTASH_PLUGINS[@]}"; do
                 start "Installing Logstash Plugin ${PLUGIN}"
-                ${BUILDDIR}/logstash-${LOGSTASH_VERSION}/bin/${LOGSTASH_PLUGIN_CMD} install ${PLUGIN} &>$STDOUT
+                ${BUILDDIR}/logstash-${LOGSTASH_VERSION}/bin/${LOGSTASH_PLUGIN_CMD} install ${PLUGIN} &>&3
                 finished
         done
 fi
@@ -94,7 +91,7 @@ if [[ ${LOGSTASH_CONFIG_CHECK} -eq 1 ]]; then
 	mkdir -p ${CACHEDIR}/conf.d
 
 	start "Check Logstash configuration"
-	${BUILDDIR}/bin/dockerize -template ${BUILDDIR}/logstash.conf:${CACHEDIR}/conf.d/logstash.conf ${BUILDDIR}/logstash-${LOGSTASH_VERSION}/bin/logstash -f ${CACHEDIR}/conf.d/logstash.conf -t &>>$STDOUT
+	${BUILDDIR}/bin/dockerize -template ${BUILDDIR}/logstash.conf:${CACHEDIR}/conf.d/logstash.conf ${BUILDDIR}/logstash-${LOGSTASH_VERSION}/bin/logstash -f ${CACHEDIR}/conf.d/logstash.conf -t &>&3
 	finished
 fi
 

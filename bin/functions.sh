@@ -1,9 +1,10 @@
 #!/bin/bash
 set -euo pipefail # Enable bash strict mode (http://redsymbol.net/articles/unofficial-bash-strict-mode/)
-STDOUT=/dev/null
 if [[ ${DEBUG:-0} -eq 1 ]]; then
 	set -x # DEBUG
-	STDOUT="&1"
+	exec 3>/dev/null
+else
+	exec 3>&1
 fi
 
 steptxt="----->"
