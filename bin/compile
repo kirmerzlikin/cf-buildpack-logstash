@@ -17,10 +17,10 @@ if [[ ! -f "${BUILDDIR}/Logstash" ]]; then
 	err "${BUILDDIR}/Logstash not found."
 fi
 
-# Source ubuntu distribution information
-if [[ -f "/etc/lsb-release" ]]; then
-	source /etc/lsb-release
-fi
+# Default Values
+LOGSTASH_CMD_ARGS=""
+LOGSTASH_PLUGINS=()
+LOGSTASH_CONFIG_CHECK=1
 
 LOGSTASH_VERSION=$(cat ${BP}/VERSION)
 LOGSTASH_FILE="logstash-${LOGSTASH_VERSION}.tar.gz"
@@ -30,6 +30,13 @@ OPENJDK_VERSION="1.7.0_51"
 OPENJDK_URL="https://java-buildpack.cloudfoundry.org/openjdk-jdk/${DISTRIB_CODENAME:-trusty}/x86_64/openjdk-${OPENJDK_VERSION}.tar.gz"
 DOCKERIZE_VERSION="v0.2.1-jsonQuery"
 DOCKERIZE_URL="https://github.com/breml/dockerize/releases/download/v0.2.1-jsonQuery/dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz"
+
+source ${BUILDDIR}/Logstash
+
+# Source ubuntu distribution information
+if [[ -f "/etc/lsb-release" ]]; then
+	source /etc/lsb-release
+fi
 
 if [[ ! -f ${BUILDDIR}/dockerize ]]; then
 	start "Installing dockerize"
@@ -62,19 +69,30 @@ if [[ ! -d ${BUILDDIR}/logstash-${LOGSTASH_VERSION} ]]; then
 	echo "downloaded ${LOGSTASH_URL}"
 fi
 
-mkdir -p ${CACHEDIR}/conf.d
+# Install Logstash Plugins
+if [[ -n ${LOGSTASH_PLUGINS} ]]; then
+        for PLUGIN in "${LOGSTASH_PLUGINS[@]}"; do
+                start "Installing Logstash Plugin ${PLUGIN}"
+                ${BUILDDIR}/logstash-${LOGSTASH_VERSION}/bin/logstash-plugin ${PLUGIN}
+                finished
+        done
+fi
 
-export JAVA_HOME="${BUILDDIR}/openjdk"
-start "Check Logstash configuration"
-${BUILDDIR}/bin/dockerize -template ${BUILDDIR}/logstash.conf:${CACHEDIR}/conf.d/logstash.conf ${BUILDDIR}/logstash-${LOGSTASH_VERSION}/bin/logstash -f ${CACHEDIR}/conf.d/logstash.conf -t >/dev/null
-finished
+if [[ ${LOGSTASH_CONFIG_CHECK} -eq 1 ]]; then
+	mkdir -p ${CACHEDIR}/conf.d
+
+	export JAVA_HOME="${BUILDDIR}/openjdk"
+	start "Check Logstash configuration"
+	${BUILDDIR}/bin/dockerize -template ${BUILDDIR}/logstash.conf:${CACHEDIR}/conf.d/logstash.conf ${BUILDDIR}/logstash-${LOGSTASH_VERSION}/bin/logstash -f ${CACHEDIR}/conf.d/logstash.conf -t >/dev/null
+	finished
+fi
 
 mkdir ${BUILDDIR}/conf.d
 
 cat << EOF >> ${BUILDDIR}/buildpack-release-step.yml
 ---
 default_process_types:
-  web: dockerize -template logstash.conf:conf.d/logstash.conf logstash-${LOGSTASH_VERSION}/bin/logstash -f conf.d/logstash.conf
+  web: dockerize -template logstash.conf:conf.d/logstash.conf logstash-${LOGSTASH_VERSION}/bin/logstash -f conf.d/logstash.conf ${LOGSTASH_CMD_ARGS}
 EOF
 
 mkdir -p ${BUILDDIR}/.profile.d
