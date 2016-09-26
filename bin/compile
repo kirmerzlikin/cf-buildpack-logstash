@@ -3,8 +3,6 @@
 BP=$(dirname $(dirname $0))
 source $BP/bin/functions.sh
 
-echo "test" >&3
-
 if [[ -z "${1:-}" ]]; then
 	err "Missing argument <build-dir>"
 fi
