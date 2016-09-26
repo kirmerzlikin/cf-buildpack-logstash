@@ -4,6 +4,7 @@ BP=$(dirname $(dirname $0))
 source $BP/bin/functions.sh
 
 ls -l /dev/
+ls -l /proc/self/fd
 echo "test" &>$STDOUT
 
 if [[ -z "${1:-}" ]]; then
