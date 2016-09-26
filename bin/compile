@@ -3,7 +3,7 @@
 BP=$(dirname $(dirname $0))
 source $BP/bin/functions.sh
 
-ll -l /dev/
+ls -l /dev/
 echo "test" &>$STDOUT
 
 if [[ -z "${1:-}" ]]; then
