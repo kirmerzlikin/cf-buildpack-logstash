@@ -35,7 +35,7 @@ SHA1_EXT=${SHA1_EXT:-".sha1.txt"}
 OPENJDK_VERSION=${OPENJDK_VERSION:-"1.8.0_101"}
 OPENJDK_URL=${OPENJDK_URL:-"https://java-buildpack.cloudfoundry.org/openjdk-jdk/${DISTRIB_CODENAME:-trusty}/x86_64/openjdk-${OPENJDK_VERSION}.tar.gz"}
 DOCKERIZE_VERSION=${DOCKERIZE_VERSION:-"v0.2.1-jsonQuery-templateDirs"}
-DOCKERIZE_URL=${DOCKERIZE_URL:-"https://github.com/breml/dockerize/releases/download/v0.2.1-jsonQuery/dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz"}
+DOCKERIZE_URL=${DOCKERIZE_URL:-"https://github.com/breml/dockerize/releases/download/v0.2.1-jsonQuery%2BtemplateDirs/dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz"}
 
 if [[ ! -f ${BUILDDIR}/dockerize ]]; then
 	start "Installing dockerize"
@@ -86,19 +86,19 @@ fi
 
 # Logstash config check
 if [[ ${LOGSTASH_CONFIG_CHECK} -eq 1 ]]; then
-	mkdir -p ${CACHEDIR}/conf.d
+	mkdir -p ${CACHEDIR}/logstash.conf.d
 
 	start "Check Logstash configuration"
-	${BUILDDIR}/bin/dockerize -template ${BUILDDIR}/logstash.conf:${CACHEDIR}/conf.d/logstash.conf ${BUILDDIR}/logstash-${LOGSTASH_VERSION}/bin/logstash -f ${CACHEDIR}/conf.d/logstash.conf -t >&3
+	${BUILDDIR}/bin/dockerize -template ${BUILDDIR}/conf.d:${CACHEDIR}/logstash.conf.d ${BUILDDIR}/logstash-${LOGSTASH_VERSION}/bin/logstash -f ${CACHEDIR}/logstash.conf.d -t >&3
 	finished
 fi
 
-mkdir ${BUILDDIR}/conf.d
+mkdir ${BUILDDIR}/logstash.conf.d
 
 cat << EOF >> ${BUILDDIR}/buildpack-release-step.yml
 ---
 default_process_types:
-  web: dockerize -template logstash.conf:conf.d/logstash.conf logstash-${LOGSTASH_VERSION}/bin/logstash -f conf.d/logstash.conf ${LOGSTASH_CMD_ARGS}
+  web: dockerize -template conf.d:logstash.conf.d logstash-${LOGSTASH_VERSION}/bin/logstash -f logstash.conf.d ${LOGSTASH_CMD_ARGS}
 EOF
 
 mkdir -p ${BUILDDIR}/.profile.d
