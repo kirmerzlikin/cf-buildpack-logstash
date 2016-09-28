@@ -112,7 +112,7 @@ default_process_types:
   web: dockerize -template conf.d:logstash.conf.d logstash-${LOGSTASH_VERSION}/bin/logstash -f logstash.conf.d ${LOGSTASH_CMD_ARGS}
 EOF
 
-#mkdir -p ${BUILDDIR}/.profile.d
+mkdir -p ${BUILDDIR}/.profile.d
 #echo 'JAVA_HOME=$HOME/openjdk' > ${BUILDDIR}/.profile.d/openjdk.sh
-#echo 'PATH=$PATH:$HOME/bin:$HOME/openjdk/bin' > ${BUILDDIR}/.profile.d/path.sh
+echo 'PATH=$PATH:$HOME/bin:$HOME/openjdk/bin' > ${BUILDDIR}/.profile.d/path.sh
 #echo "LS_HEAP_SIZE=${LS_HEAP_SIZE}" > ${BUILDDIR}/.profile.d/logstash.sh
