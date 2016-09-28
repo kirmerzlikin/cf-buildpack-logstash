@@ -12,6 +12,7 @@ YELLOW='\033[1;33m'
 RED='\033[1;31m'
 NC='\033[0m' # No Color
 CURL="/usr/bin/curl -s -L --retry 15 --retry-delay 2" # retry for up to 30 seconds
+EMPTYARRAY=()
 
 warn() {
     echo -e "${YELLOW} !!    $@${NC}"
