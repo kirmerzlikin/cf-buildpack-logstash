@@ -33,3 +33,7 @@ start() {
 finished() {
     echo "done"
 }
+
+indent() {
+  sed -u 's/^/       /' >&3
+}
