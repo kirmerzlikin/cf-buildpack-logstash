@@ -51,6 +51,7 @@ fi
 if [[ ! -f ${BUILDDIR}/bin/jq ]]; then
 	start "Installing jq"
 	${CURL} -o ${BUILDDIR}/bin/jq ${DOCKERIZE_URL}
+	chmod +x ${BUILDDIR}/bin/jq
 	finished
 	step "downloaded ${JQ_URL}"
 fi
@@ -78,6 +79,7 @@ if [[ ! -d ${BUILDDIR}/logstash-${LOGSTASH_VERSION} ]]; then
 fi
 
 export JAVA_HOME="${BUILDDIR}/openjdk"
+export LS_HEAP_SIZE=$(echo ${VCAP_APPLICATION} | ${BUILDDIR}/bin/jq '.limits.mem * .9 | floor')
 
 # Install Logstash Plugins
 if [[ -n ${LOGSTASH_PLUGINS:-""} ]]; then
@@ -113,6 +115,4 @@ EOF
 mkdir -p ${BUILDDIR}/.profile.d
 echo 'JAVA_HOME=$HOME/openjdk' > ${BUILDDIR}/.profile.d/openjdk.sh
 echo 'PATH=$PATH:$HOME/bin:$HOME/openjdk/bin' > ${BUILDDIR}/.profile.d/path.sh
-echo "LS_HEAP_SIZE=$(echo ${VCAP_APPLICATION} | ${BUILDDIR}/bin/jq '.limits.mem * .9 | floor')" > ${BUILDDIR}/.profile.d/logstash.sh
-#echo 'LS_HEAP_SIZE={{ jsonQuery .Env.VCAP_APPLICATION "limits.mem" }}m' > ${CACHEDIR}/logstash.sh
-#dockerize -template ${CACHEDIR}/logstash.sh ${BUILDDIR}/.profile.d/logstash.sh
+echo "LS_HEAP_SIZE=$(echo ${LS_HEAP_SIZE})"
