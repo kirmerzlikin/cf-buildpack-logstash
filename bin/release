@@ -1,5 +1,5 @@
 #!/bin/bash
-# usage: bin/compile <build-dir> <cache-dir>
+# usage: bin/release <build-dir>
 BP=$(dirname $(dirname $0))
 source $BP/bin/functions.sh
 
