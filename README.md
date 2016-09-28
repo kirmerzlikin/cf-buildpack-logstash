@@ -28,11 +28,11 @@ so it has to be valid `bash` code to work.
 
 The follow settings are allowed:
 
-* `LOGSTASH_VERION`: Version of Logstash to be deployed
-* `LOGSTASH_CMD_ARGS`: Additional command line arguments for Logstash
-* `LOGSTASH_PLUGINS`: Array of Logstash plugins, which are not provided with the default Logstash, but are installable by `logstash-plugin`.
-* `LOGSTASH_CONFIG_CHECK`: Boolean (0/1) if a pre-flight-check should be performed with the Logstash configuration during app deployment.
-* `LS_HEAP_SIZE`: Heap size for Logstash. By defaults to 90% of the app memory limit.
+* `LOGSTASH_VERION`: Version of Logstash to be deployed. Defaults to 2.4.0
+* `LOGSTASH_CMD_ARGS`: Additional command line arguments for Logstash. Empty by default
+* `LOGSTASH_PLUGINS`: Array of Logstash plugins, which are not provided with the default Logstash, but are installable by `logstash-plugin`. Empty by default
+* `LOGSTASH_CONFIG_CHECK`: Boolean (0/1) if a pre-flight-check should be performed with the Logstash configuration during app deployment. Defaults to `1`
+* `LS_HEAP_SIZE`: Heap size for Logstash. By defaults to 90% of the app memory limit
 
 Example file:
 
