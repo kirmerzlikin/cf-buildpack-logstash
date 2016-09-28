@@ -36,14 +36,23 @@ OPENJDK_VERSION=${OPENJDK_VERSION:-"1.8.0_101"}
 OPENJDK_URL=${OPENJDK_URL:-"https://java-buildpack.cloudfoundry.org/openjdk-jdk/${DISTRIB_CODENAME:-trusty}/x86_64/openjdk-${OPENJDK_VERSION}.tar.gz"}
 DOCKERIZE_VERSION=${DOCKERIZE_VERSION:-"v0.2.1-jsonQuery-templateDirs"}
 DOCKERIZE_URL=${DOCKERIZE_URL:-"https://github.com/breml/dockerize/releases/download/v0.2.1-jsonQuery%2BtemplateDirs/dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz"}
+JQ_URL=${JQ_URL:-"https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64"}
 
-if [[ ! -f ${BUILDDIR}/dockerize ]]; then
+mkdir -p ${BUILDDIR}/bin
+
+if [[ ! -f ${BUILDDIR}/bin/dockerize ]]; then
 	start "Installing dockerize"
-	mkdir ${BUILDDIR}/bin
 	cd ${BUILDDIR}/bin
 	${CURL} ${DOCKERIZE_URL} | tar zxf -
 	finished
 	step "downloaded ${DOCKERIZE_URL}"
+fi
+
+if [[ ! -f ${BUILDDIR}/bin/jq]]; then
+	start "Installing jq"
+	${CURL} -o ${BUILDDIR}/bin/jq ${DOCKERIZE_URL}
+	finished
+	step "downloaded ${JQ_URL}"
 fi
 
 if [[ ! -d ${BUILDDIR}/openjdk ]]; then
@@ -104,3 +113,6 @@ EOF
 mkdir -p ${BUILDDIR}/.profile.d
 echo 'JAVA_HOME=$HOME/openjdk' > ${BUILDDIR}/.profile.d/openjdk.sh
 echo 'PATH=$PATH:$HOME/bin:$HOME/openjdk/bin' > ${BUILDDIR}/.profile.d/path.sh
+echo "LS_HEAP_SIZE=$(echo ${VCAP_APPLICATION} | ${BUILDDIR}/bin/jq '.limits.mem * .9 | floor')" > ${BUILDDIR}/.profile.d/logstash.sh
+#echo 'LS_HEAP_SIZE={{ jsonQuery .Env.VCAP_APPLICATION "limits.mem" }}m' > ${CACHEDIR}/logstash.sh
+#dockerize -template ${CACHEDIR}/logstash.sh ${BUILDDIR}/.profile.d/logstash.sh
