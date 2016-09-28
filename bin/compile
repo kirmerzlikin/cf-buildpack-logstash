@@ -114,5 +114,5 @@ EOF
 
 mkdir -p ${BUILDDIR}/.profile.d
 #echo 'JAVA_HOME=$HOME/openjdk' > ${BUILDDIR}/.profile.d/openjdk.sh
-echo 'PATH=$PATH:$HOME/bin:$HOME/openjdk/bin' > ${BUILDDIR}/.profile.d/path.sh
-#echo "LS_HEAP_SIZE=${LS_HEAP_SIZE}" > ${BUILDDIR}/.profile.d/logstash.sh
+echo 'PATH=$PATH:$HOME/bin:$HOME/openjdk/bin' > ${BUILDDIR}/.profile.d/logstash.sh
+echo "LS_HEAP_SIZE=${LS_HEAP_SIZE}" >> ${BUILDDIR}/.profile.d/logstash.sh
