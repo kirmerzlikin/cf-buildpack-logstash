@@ -48,7 +48,7 @@ if [[ ! -f ${BUILDDIR}/bin/dockerize ]]; then
 	step "downloaded ${DOCKERIZE_URL}"
 fi
 
-if [[ ! -f ${BUILDDIR}/bin/jq]]; then
+if [[ ! -f ${BUILDDIR}/bin/jq ]]; then
 	start "Installing jq"
 	${CURL} -o ${BUILDDIR}/bin/jq ${DOCKERIZE_URL}
 	finished
