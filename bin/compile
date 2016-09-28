@@ -109,7 +109,7 @@ mkdir ${BUILDDIR}/logstash.conf.d
 cat << EOF >> ${BUILDDIR}/buildpack-release-step.yml
 ---
 default_process_types:
-  web: dockerize -template conf.d:logstash.conf.d /bin/bash -c bin/logstash.sh
+  web: bin/dockerize -template conf.d:logstash.conf.d /bin/bash -c bin/logstash.sh
 EOF
 
 mkdir -p ${BUILDDIR}/.profile.d
