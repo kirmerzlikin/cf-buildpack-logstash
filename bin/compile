@@ -50,7 +50,7 @@ fi
 
 if [[ ! -f ${BUILDDIR}/bin/jq ]]; then
 	start "Installing jq"
-	${CURL} -o ${BUILDDIR}/bin/jq ${DOCKERIZE_URL}
+	${CURL} -o ${BUILDDIR}/bin/jq ${JQ_URL}
 	chmod +x ${BUILDDIR}/bin/jq
 	finished
 	step "downloaded ${JQ_URL}"
@@ -115,4 +115,4 @@ EOF
 mkdir -p ${BUILDDIR}/.profile.d
 echo 'JAVA_HOME=$HOME/openjdk' > ${BUILDDIR}/.profile.d/openjdk.sh
 echo 'PATH=$PATH:$HOME/bin:$HOME/openjdk/bin' > ${BUILDDIR}/.profile.d/path.sh
-echo "LS_HEAP_SIZE=$(echo ${LS_HEAP_SIZE})"
+echo "LS_HEAP_SIZE=$(echo ${LS_HEAP_SIZE})" > ${BUILDDIR}/.profile.d/logstash.sh
