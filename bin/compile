@@ -109,13 +109,14 @@ mkdir ${BUILDDIR}/logstash.conf.d
 cat << EOF >> ${BUILDDIR}/buildpack-release-step.yml
 ---
 default_process_types:
-  web: dockerize -template conf.d:logstash.conf.d bin/logstash.sh
+  web: dockerize -template conf.d:logstash.conf.d /bin/bash -c bin/logstash.sh
 EOF
 
 mkdir -p ${BUILDDIR}/.profile.d
 echo 'PATH=$PATH:$HOME/bin:$HOME/openjdk/bin' > ${BUILDDIR}/.profile.d/logstash.sh
 
-echo 'export JAVA_HOME=$HOME/openjdk' > ${BUILDDIR}/bin/logstash.sh
+echo '#!/bin/bash' > ${BUILDDIR}/bin/logstash.sh
+echo 'export JAVA_HOME=$HOME/openjdk' >> ${BUILDDIR}/bin/logstash.sh
 echo "export LS_HEAP_SIZE=${LS_HEAP_SIZE}" >> ${BUILDDIR}/bin/logstash.sh
 echo "logstash-${LOGSTASH_VERSION}/bin/logstash -f logstash.conf.d ${LOGSTASH_CMD_ARGS}" >> ${BUILDDIR}/bin/logstash.sh
 chmod +x ${BUILDDIR}/bin/logstash.sh
