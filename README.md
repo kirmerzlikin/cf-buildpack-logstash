@@ -1,5 +1,7 @@
 # Logstash Buildpack for Cloud Foundry
 
+**WARNING**: This is work in progress, do not use in production.
+
 This buildpack allows to deploy [Logstash](https://www.elastic.co/products/logstash) as an app in Cloud Foundry.
 
 ## Usage
@@ -74,4 +76,37 @@ configuration, it's suggested to set the paths by the template engine. Example (
 ```
 patterns_dir => "{{ .Env.HOME }}/grok-patterns"
 ```
+
+### Deploy App to Cloud Foundry
+
+To deploy the Logstash app to Cloud Foundry using this buildpack, use the following command:
+
+```
+cf push -b https://github.com/swisscom/swisscom/cf-buildpack-logstash.git
+```
+
+After the successful upload of the application to Cloud Foundry, you may use a *user provided service* to ship the logs of your
+application to your newly deployed Logstash applicationrr.
+
+Create the log drain:
+
+```
+cf cups logstash-log-drain -l https://USERNAME:PASSWORD@URL-OF-LOGSTASH-INSTANCE
+```
+
+Bind the log drain to your app. You could optionally bind multiple apps to one log drain:
+
+```
+cf bind-service YOUR-CF-APP-NAME logstash-log-drain
+```
+
+Restage the app to pick up the newly bound service:
+
+```
+cf restage YOUR-CF-APP-NAME
+```
+
+You find more details in the [Cloud Foundry documentation](https://docs.cloudfoundry.org/devguide/services/log-management.html)
+
+Alternatively the log drain may also be configured in your application manifest as described in chapter [Application Log Streaming](https://docs.cloudfoundry.org/services/app-log-streaming.html).
 

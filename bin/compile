@@ -120,3 +120,4 @@ echo 'export JAVA_HOME=$HOME/openjdk' >> ${BUILDDIR}/bin/logstash.sh
 echo "export LS_HEAP_SIZE=${LS_HEAP_SIZE}" >> ${BUILDDIR}/bin/logstash.sh
 echo "logstash-${LOGSTASH_VERSION}/bin/logstash -f logstash.conf.d ${LOGSTASH_CMD_ARGS}" >> ${BUILDDIR}/bin/logstash.sh
 chmod +x ${BUILDDIR}/bin/logstash.sh
+

@@ -9,3 +9,4 @@ fi
 BUILDDIR=$(cd "${1:-}/" && pwd)
 
 echo "$(cat ${BUILDDIR}/buildpack-release-step.yml)"
+
