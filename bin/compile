@@ -4,22 +4,22 @@ BP=$(dirname $(dirname $0))
 source $BP/bin/functions.sh
 
 if [[ -z "${1:-}" ]]; then
-	err "Missing argument <build-dir>"
+  err "Missing argument <build-dir>"
 fi
 BUILDDIR=$(cd "${1:-}/" && pwd)
 
 if [[ -z "${2:-}" ]]; then
-	err "Missing argument <cache-dir>"
+  err "Missing argument <cache-dir>"
 fi
 CACHEDIR=$(cd "${2:-}" && pwd)
 
 if [[ ! -f "${BUILDDIR}/Logstash" ]]; then
-	err "${BUILDDIR}/Logstash not found."
+  err "${BUILDDIR}/Logstash not found."
 fi
 
 # Source ubuntu distribution information
 if [[ -f "/etc/lsb-release" ]]; then
-	source /etc/lsb-release
+  source /etc/lsb-release
 fi
 
 source ${BUILDDIR}/Logstash
@@ -41,41 +41,41 @@ JQ_URL=${JQ_URL:-"https://github.com/stedolan/jq/releases/download/jq-1.5/jq-lin
 mkdir -p ${BUILDDIR}/bin
 
 if [[ ! -f ${BUILDDIR}/bin/dockerize ]]; then
-	start "Installing dockerize"
-	cd ${BUILDDIR}/bin
-	${CURL} ${DOCKERIZE_URL} | tar zxf -
-	finished
-	step "downloaded ${DOCKERIZE_URL}"
+  start "Installing dockerize"
+  cd ${BUILDDIR}/bin
+  ${CURL} ${DOCKERIZE_URL} | tar zxf -
+  finished
+  step "downloaded ${DOCKERIZE_URL}"
 fi
 
 if [[ ! -f ${BUILDDIR}/bin/jq ]]; then
-	start "Installing jq"
-	${CURL} -o ${BUILDDIR}/bin/jq ${JQ_URL}
-	chmod +x ${BUILDDIR}/bin/jq
-	finished
-	step "downloaded ${JQ_URL}"
+  start "Installing jq"
+  ${CURL} -o ${BUILDDIR}/bin/jq ${JQ_URL}
+  chmod +x ${BUILDDIR}/bin/jq
+  finished
+  step "downloaded ${JQ_URL}"
 fi
 
 if [[ ! -d ${BUILDDIR}/openjdk ]]; then
-	start "Installing openjdk"
-	mkdir -p ${BUILDDIR}/openjdk
-	cd ${BUILDDIR}/openjdk
-	${CURL} ${OPENJDK_URL} | tar zxf -
-	finished
-	step "downloaded ${OPENJDK_URL}"
+  start "Installing openjdk"
+  mkdir -p ${BUILDDIR}/openjdk
+  cd ${BUILDDIR}/openjdk
+  ${CURL} ${OPENJDK_URL} | tar zxf -
+  finished
+  step "downloaded ${OPENJDK_URL}"
 fi
 
 if [[ ! -d ${BUILDDIR}/logstash-${LOGSTASH_VERSION} ]]; then
-	start "Installing Logstash ${LOGSTASH_VERSION}"
-	${CURL} -o "${CACHEDIR}/${LOGSTASH_FILE}" "${LOGSTASH_URL}"
+  start "Installing Logstash ${LOGSTASH_VERSION}"
+  ${CURL} -o "${CACHEDIR}/${LOGSTASH_FILE}" "${LOGSTASH_URL}"
 
-	${CURL} -o "${CACHEDIR}/${LOGSTASH_FILE}${SHA1_EXT}" "${LOGSTASH_URL}${SHA1_EXT}"
-	cd ${CACHEDIR}
-	sha1sum --check ${CACHEDIR}/${LOGSTASH_FILE}${SHA1_EXT} | indent
+  ${CURL} -o "${CACHEDIR}/${LOGSTASH_FILE}${SHA1_EXT}" "${LOGSTASH_URL}${SHA1_EXT}"
+  cd ${CACHEDIR}
+  sha1sum --check ${CACHEDIR}/${LOGSTASH_FILE}${SHA1_EXT} | indent
 
-	tar -zx -C ${BUILDDIR} -f ${CACHEDIR}/${LOGSTASH_FILE}
-	finished
-	step "downloaded ${LOGSTASH_URL}"
+  tar -zx -C ${BUILDDIR} -f ${CACHEDIR}/${LOGSTASH_FILE}
+  finished
+  step "downloaded ${LOGSTASH_URL}"
 fi
 
 export JAVA_HOME="${BUILDDIR}/openjdk"
@@ -83,25 +83,25 @@ export LS_HEAP_SIZE="${LS_HEAP_SIZE:-$(echo ${VCAP_APPLICATION} | ${BUILDDIR}/bi
 
 # Install Logstash Plugins
 if [[ -n ${LOGSTASH_PLUGINS:-""} ]]; then
-		step "Installing Logstash Plugins"
-		LOGSTASH_PLUGIN_CMD="logstash-plugin"
-		if [[ ! -x ${BUILDDIR}/logstash-${LOGSTASH_VERSION}/bin/${LOGSTASH_PLUGIN_CMD} ]]; then
-			LOGSTASH_PLUGIN_CMD="plugin"
-		fi
-        for PLUGIN in "${LOGSTASH_PLUGINS[@]}"; do
-                start "Installing Logstash Plugin ${PLUGIN}"
-                ${BUILDDIR}/logstash-${LOGSTASH_VERSION}/bin/${LOGSTASH_PLUGIN_CMD} install ${PLUGIN} | indent
-                finished
-        done
+  step "Installing Logstash Plugins"
+  LOGSTASH_PLUGIN_CMD="logstash-plugin"
+  if [[ ! -x ${BUILDDIR}/logstash-${LOGSTASH_VERSION}/bin/${LOGSTASH_PLUGIN_CMD} ]]; then
+    LOGSTASH_PLUGIN_CMD="plugin"
+  fi
+  for PLUGIN in "${LOGSTASH_PLUGINS[@]}"; do
+    start "Installing Logstash Plugin ${PLUGIN}"
+    ${BUILDDIR}/logstash-${LOGSTASH_VERSION}/bin/${LOGSTASH_PLUGIN_CMD} install ${PLUGIN} | indent
+    finished
+  done
 fi
 
 # Logstash config check
 if [[ ${LOGSTASH_CONFIG_CHECK} -eq 1 ]]; then
-	mkdir -p ${CACHEDIR}/logstash.conf.d
+  mkdir -p ${CACHEDIR}/logstash.conf.d
 
-	start "Check Logstash configuration"
-	${BUILDDIR}/bin/dockerize -template ${BUILDDIR}/conf.d:${CACHEDIR}/logstash.conf.d ${BUILDDIR}/logstash-${LOGSTASH_VERSION}/bin/logstash -f ${CACHEDIR}/logstash.conf.d -t | indent
-	finished
+  start "Check Logstash configuration"
+  ${BUILDDIR}/bin/dockerize -template ${BUILDDIR}/conf.d:${CACHEDIR}/logstash.conf.d ${BUILDDIR}/logstash-${LOGSTASH_VERSION}/bin/logstash -f ${CACHEDIR}/logstash.conf.d -t | indent
+  finished
 fi
 
 mkdir ${BUILDDIR}/logstash.conf.d
@@ -120,4 +120,3 @@ echo 'export JAVA_HOME=$HOME/openjdk' >> ${BUILDDIR}/bin/logstash.sh
 echo "export LS_HEAP_SIZE=${LS_HEAP_SIZE}" >> ${BUILDDIR}/bin/logstash.sh
 echo "logstash-${LOGSTASH_VERSION}/bin/logstash -f logstash.conf.d ${LOGSTASH_CMD_ARGS}" >> ${BUILDDIR}/bin/logstash.sh
 chmod +x ${BUILDDIR}/bin/logstash.sh
-

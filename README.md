@@ -44,7 +44,7 @@ Example file:
 LOGSTASH_VERSION="2.4.0"
 LOGSTASH_CMD_ARGS=""
 LOGSTASH_PLUGINS=(
-	"logstash-codec-cef"
+  "logstash-codec-cef"
 )
 LOGSTASH_CONFIG_CHECK=1
 LS_HEAP_SIZE=500m

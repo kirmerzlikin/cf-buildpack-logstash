@@ -4,9 +4,8 @@ BP=$(dirname $(dirname $0))
 source $BP/bin/functions.sh
 
 if [[ -z "${1:-}" ]]; then
-	err "Missing argument <build-dir>"
+  err "Missing argument <build-dir>"
 fi
 BUILDDIR=$(cd "${1:-}/" && pwd)
 
 echo "$(cat ${BUILDDIR}/buildpack-release-step.yml)"
-

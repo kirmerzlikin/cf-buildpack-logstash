@@ -4,12 +4,12 @@ BP=$(dirname $(dirname $0))
 source $BP/bin/functions.sh
 
 if [[ -z "${1:-}" ]]; then
-	echo "Missing argument <build-dir>"
+  echo "Missing argument <build-dir>"
 fi
 BUILD=$(cd "${1:-}/" && pwd)
 
 if [[ ! -f "${BUILD}/Logstash" ]]; then
-	exit 1
+  exit 1
 fi
 
 echo "Logstash Application"
