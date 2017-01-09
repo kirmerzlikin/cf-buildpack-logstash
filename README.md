@@ -110,3 +110,6 @@ You find more details in the [Cloud Foundry documentation](https://docs.cloudfou
 
 Alternatively the log drain may also be configured in your application manifest as described in chapter [Application Log Streaming](https://docs.cloudfoundry.org/services/app-log-streaming.html).
 
+## Limitations
+
+* This buildpack is only tested on Ubuntu based deployments.
