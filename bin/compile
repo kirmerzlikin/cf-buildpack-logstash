@@ -37,6 +37,10 @@ OPENJDK_VERSION=${OPENJDK_VERSION:-"1.8.0_101"}
 OPENJDK_URL=${OPENJDK_URL:-"https://java-buildpack.cloudfoundry.org/openjdk-jdk/${DISTRIB_CODENAME:-trusty}/x86_64/openjdk-${OPENJDK_VERSION}.tar.gz"}
 
 # Curator
+CURATOR_COMPILE=${CURATOR_COMPILE:-0}
+# Download link for curator 4.2.4, valid until end of year 2026
+CURATOR_PRECOMPILED="https://ds31s3.swisscom.com/logstash-buildpack/curator-4.2.4-python-3.4.3.tar.gz?AWSAccessKeyId=5484335407854a4c9dc88e01206fc148%2FCF_P8_2CB0C541_6550_4D1E_B84F_70D7C543FB29&Expires=1799333818&Signature=IVrhU2KeN3VLz1K3DEO5HmhXYEs%3D"
+
 PYTHON3_VERSION=${PYTHON3_VERSION:-"3.4.3"}
 PYTHON3_URL=${PYTHON3_URL:-"https://www.python.org/ftp/python/${PYTHON3_VERSION}/Python-${PYTHON3_VERSION}.tgz"}
 CERTIFI_URL="https://github.com/certifi/python-certifi/archive/2016.09.26.tar.gz"
@@ -80,69 +84,77 @@ fi
 
 # Install curator
 if [[ ! -d ${BUILDDIR}/python3 ]]; then
-  step "Start installing curator (including its dependencies)"
-  start "Download python3"
-  mkdir -p ${BUILDDIR}/python3
-  mkdir -p ${CACHEDIR}/python3
-  cd ${CACHEDIR}/python3
-  ${CURL} ${PYTHON3_URL} | tar xzf -
-  finished
-  step "downloaded ${PYTHON3_URL}"
+  if [[ ${CURATOR_COMPILE} -eq 0 ]]; then
+    # Use precompiled curator with python from S3 bucket
+    start "Download precompiled curator (with python)"
+    cd ${BUILDDIR}
+    ${CURL} ${CURATOR_PRECOMPILED} | tar zxf -
+    finished
+  else
+    step "Start installing curator (including its dependencies)"
+    start "Download python3"
+    mkdir -p ${BUILDDIR}/python3
+    mkdir -p ${CACHEDIR}/python3
+    cd ${CACHEDIR}/python3
+    ${CURL} ${PYTHON3_URL} | tar xzf -
+    finished
+    step "downloaded ${PYTHON3_URL}"
 
-  start "Compiling python3"
-  # Detect # of CPUs so make jobs can be parallelized
-  CPUS=`grep -c ^processor /proc/cpuinfo`
+    start "Compiling python3"
+    # Detect # of CPUs so make jobs can be parallelized
+    CPUS=`grep -c ^processor /proc/cpuinfo`
 
-  pushd Python-3.4.3
-    ./configure --prefix=${BUILDDIR}/python3 | indent
-    make -j${CPUS} | indent
-    make install | indent
-  popd
-  # PATH: /home/vcap/app/python3/bin
-  # ${BUILDDIR}/python3/bin
-  finished
+    pushd Python-3.4.3
+      ./configure --prefix=${BUILDDIR}/python3 | indent
+      make -j${CPUS} | indent
+      make install | indent
+    popd
+    # PATH: /home/vcap/app/python3/bin
+    # ${BUILDDIR}/python3/bin
+    finished
 
-  step "Download curator and dependencies"
-  mkdir -p ${BUILDDIR}/curator
-  mkdir -p ${CACHEDIR}/curator
-  start "Download certifi"
-  ${CURL} -o ${CACHEDIR}/curator/${CERTIFI_TARGET} ${CERTIFI_URL}
-  finished
+    step "Download curator and dependencies"
+    mkdir -p ${BUILDDIR}/curator
+    mkdir -p ${CACHEDIR}/curator
+    start "Download certifi"
+    ${CURL} -o ${CACHEDIR}/curator/${CERTIFI_TARGET} ${CERTIFI_URL}
+    finished
 
-  start "Download click"
-  ${CURL} -o ${CACHEDIR}/curator/${CLICK_TARGET} ${CLICK_URL}
-  finished
+    start "Download click"
+    ${CURL} -o ${CACHEDIR}/curator/${CLICK_TARGET} ${CLICK_URL}
+    finished
 
-  start "Download elasticsearch-curator"
-  ${CURL} -o ${CACHEDIR}/curator/${ELASTICSEARCH_CURATOR_TARGET} ${ELASTICSEARCH_CURATOR_URL}
-  finished
+    start "Download elasticsearch-curator"
+    ${CURL} -o ${CACHEDIR}/curator/${ELASTICSEARCH_CURATOR_TARGET} ${ELASTICSEARCH_CURATOR_URL}
+    finished
 
-  start "Download elsticsearch"
-  ${CURL} -o ${CACHEDIR}/curator/${ELASTICSEARCH_TARGET} ${ELASTICSEARCH_URL}
-  finished
+    start "Download elsticsearch"
+    ${CURL} -o ${CACHEDIR}/curator/${ELASTICSEARCH_TARGET} ${ELASTICSEARCH_URL}
+    finished
 
-  start "Download PyYAML"
-  ${CURL} -o ${CACHEDIR}/curator/${PYYAML_TARGET} ${PYYAML_URL}
-  finished
+    start "Download PyYAML"
+    ${CURL} -o ${CACHEDIR}/curator/${PYYAML_TARGET} ${PYYAML_URL}
+    finished
 
-  start "Download urllib3"
-  ${CURL} -o ${CACHEDIR}/curator/${URLLIB3_TARGET} ${URLLIB3_URL}
-  finished
+    start "Download urllib3"
+    ${CURL} -o ${CACHEDIR}/curator/${URLLIB3_TARGET} ${URLLIB3_URL}
+    finished
 
-  start "Download voluptuous"
-  ${CURL} -o ${CACHEDIR}/curator/${VOLUPTUOUS_TARGET} ${VOLUPTUOUS_URL}
-  finished
+    start "Download voluptuous"
+    ${CURL} -o ${CACHEDIR}/curator/${VOLUPTUOUS_TARGET} ${VOLUPTUOUS_URL}
+    finished
 
-  step "All dependancies should be in ${CACHEDIR}/curator"
-  find ${CACHEDIR}/curator | indent
+    step "All dependancies should be in ${CACHEDIR}/curator"
+    find ${CACHEDIR}/curator | indent
 
-  export PATH=${BUILDDIR}/python3/bin:$PATH
-  # --no-index prevents contacting pypi to download packages
-  # --find-links tells pip where to look for the dependancies
-  pip3 install --no-index --find-links ${CACHEDIR}/curator --install-option="--prefix=${BUILDDIR}/curator" elasticsearch-curator
+    export PATH=${BUILDDIR}/python3/bin:$PATH
+    # --no-index prevents contacting pypi to download packages
+    # --find-links tells pip where to look for the dependancies
+    pip3 install --no-index --find-links ${CACHEDIR}/curator --install-option="--prefix=${BUILDDIR}/curator" elasticsearch-curator
 
-  step "Installed to ${BUILDDIR}/curator"
-  find ${BUILDDIR}/curator | indent
+    step "Installed to ${BUILDDIR}/curator"
+    find ${BUILDDIR}/curator | indent
+  fi
 
   export PYTHONHOME=${BUILDDIR}/python3
   export PYTHONPATH=${BUILDDIR}/curator/lib/python3.4/site-packages
