@@ -3,6 +3,7 @@
 **WARNING**: This is work in progress, do not use in production.
 
 This buildpack allows to deploy [Logstash](https://www.elastic.co/products/logstash) as an app in Cloud Foundry.
+The buildpack also includes curator, which allows to manage the indices in Elasticsearch.
 
 ## Usage
 
@@ -16,8 +17,13 @@ A Logstash Cloud Foundry App has the following structure:
 │   ├── filter.conf
 │   ├── input.conf
 │   └── output.conf
+├── curator.d
+│   ├── actions.yml
+│   └── curator.yml
 ├── grok-patterns
 │   └── grok-patterns
+├── mappings
+│   └── elasticsearch-template.json
 ├── Logstash
 └── manifest.yml
 ```
@@ -35,6 +41,8 @@ The follow settings are allowed:
 * `LOGSTASH_PLUGINS`: Array of Logstash plugins, which are not provided with the default Logstash, but are installable by `logstash-plugin`. Empty by default
 * `LOGSTASH_CONFIG_CHECK`: Boolean (0/1) if a pre-flight-check should be performed with the Logstash configuration during app deployment. Defaults to `1`
 * `LS_HEAP_SIZE`: Heap size for Logstash. By defaults to 90% of the app memory limit
+* `CURATOR_ENABLED`: Should curator be enabled (1) or disabled (0)
+* `CURATOR_SCHEDULE`: Schedule for curator (when to run curator) in cron like syntax (https://godoc.org/github.com/robfig/cron). Format `second minute hour day_of_month month day_of_week`
 
 Example file:
 
@@ -48,6 +56,8 @@ LOGSTASH_PLUGINS=(
 )
 LOGSTASH_CONFIG_CHECK=1
 LS_HEAP_SIZE=500m
+CURATOR_ENABLED=1
+CURATOR_SCHEDULE="0 5 2 * * *"
 ```
 
 #### manifest.yml
@@ -60,13 +70,22 @@ If the special environment variable `DEBUG` is set to `1`, debug output is given
 
 #### conf.d
 
-In the folder `conf.d` the Logstash configuration is provided. The folder it self and at least one configuration file is required for Logstash
+In the folder `conf.d` the [Logstash](https://www.elastic.co/guide/en/logstash/current/index.html) configuration is provided. The folder it self and at least one configuration file is required for Logstash
 to be deployed successfully. All files in this directory are used as part of the Logstash configuration.
 Prior to the start of Logstash, all files in this directory are processed by [dockerize](https://github.com/jwilder/dockerize) as templates.
 This allow to update the configuration files based on the environment variables provided by Cloud Foundry (e.g. VCAP_APPLICATION, VCAP_SERVICES).
 
 The supported functions for the templates are documented in [dockerize - using templates](https://github.com/jwilder/dockerize/blob/master/README.md#using-templates) 
 and [golang - template](https://golang.org/pkg/text/template/).
+
+#### curator.d
+
+Configuration folder for [curator](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/index.html) containing two files:
+
+* `actions.yml`: General configuration of curator. For details see section [Configuration File](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/configfile.html) in the official documentation.
+* `curator.yml`: Definitions of the actions to be executed by curator. For details see section [Action File](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/actionfile.html) in the official documentation.
+
+Both files are processed with [dockerize](https://github.com/jwilder/dockerize). For details see above in the section about the folder `conf.d`.
 
 #### grok-patterns (and other 3rd party configuration)
 
@@ -76,6 +95,10 @@ configuration, it's suggested to set the paths by the template engine. Example (
 ```
 patterns_dir => "{{ .Env.HOME }}/grok-patterns"
 ```
+
+#### mappings
+
+Optional folder to ship mapping templates for Elasticsearch. These mapping templates could be applied by Logstash. See [logstash-output-elasticsearch](https://www.elastic.co/guide/en/logstash/current/plugins-outputs-elasticsearch.html) for details.
 
 ### Deploy App to Cloud Foundry
 
