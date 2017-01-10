@@ -37,6 +37,8 @@ OPENJDK_VERSION=${OPENJDK_VERSION:-"1.8.0_101"}
 OPENJDK_URL=${OPENJDK_URL:-"https://java-buildpack.cloudfoundry.org/openjdk-jdk/${DISTRIB_CODENAME:-trusty}/x86_64/openjdk-${OPENJDK_VERSION}.tar.gz"}
 
 # Curator
+CURATOR_ENABLED=${CURATOR_ENABLED:-0}
+CURATOR_SCHEDULE=${CURATOR_SCHEDULE:-"@daily"}
 CURATOR_COMPILE=${CURATOR_COMPILE:-0}
 # Download link for curator 4.2.4, valid until end of year 2026
 CURATOR_PRECOMPILED="https://ds31s3.swisscom.com/logstash-buildpack/curator-4.2.4-python-3.4.3.tar.gz?AWSAccessKeyId=5484335407854a4c9dc88e01206fc148%2FCF_P8_2CB0C541_6550_4D1E_B84F_70D7C543FB29&Expires=1799333818&Signature=IVrhU2KeN3VLz1K3DEO5HmhXYEs%3D"
@@ -62,24 +64,36 @@ VOLUPTUOUS_TARGET="voluptuous-0.9.3.tar.gz"
 DOCKERIZE_VERSION=${DOCKERIZE_VERSION:-"v0.3.0"}
 DOCKERIZE_URL=${DOCKERIZE_URL:-"https://github.com/jwilder/dockerize/releases/download/${DOCKERIZE_VERSION}/dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz"}
 JQ_URL=${JQ_URL:-"https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64"}
+OFELIA_VERSION="v0.2.2"
+OFELIA_URL="https://github.com/mcuadros/ofelia/releases/download/${OFELIA_VERSION}/ofelia_${OFELIA_VERSION}_linux_amd64.tar.gz"
 # " Correct syntax hilighting
 
 mkdir -p ${BUILDDIR}/bin
 
+# Install dockerize
 if [[ ! -f ${BUILDDIR}/bin/dockerize ]]; then
   start "Installing dockerize"
   cd ${BUILDDIR}/bin
-  ${CURL} ${DOCKERIZE_URL} | tar zxf -
+  ${CURL} ${DOCKERIZE_URL} | tar xzf -
   finished
-  step "downloaded ${DOCKERIZE_URL}"
+  step "Downloaded ${DOCKERIZE_URL}"
 fi
 
+# Install jq
 if [[ ! -f ${BUILDDIR}/bin/jq ]]; then
   start "Installing jq"
   ${CURL} -o ${BUILDDIR}/bin/jq ${JQ_URL}
   chmod +x ${BUILDDIR}/bin/jq
   finished
-  step "downloaded ${JQ_URL}"
+  step "Downloaded ${JQ_URL}"
+fi
+
+# Install ofelia
+if [[ ! -f ${BUILDDIR}/bin/ofelia ]]; then
+  start "Installing ofelia"
+  ${CURL} ${OFELIA_URL} | tar xzf - -C ${BUILDDIR}/bin --strip-components=1
+  finished
+  step "Downloaded ${OFELIA_URL}"
 fi
 
 # Install curator
@@ -90,7 +104,7 @@ if [[ ! -d ${BUILDDIR}/python3 ]]; then
     cd ${BUILDDIR}
     ${CURL} ${CURATOR_PRECOMPILED} | tar zxf -
     finished
-  else
+  else # Compile curator, dependecies and python
     step "Start installing curator (including its dependencies)"
     start "Download python3"
     mkdir -p ${BUILDDIR}/python3
@@ -98,7 +112,7 @@ if [[ ! -d ${BUILDDIR}/python3 ]]; then
     cd ${CACHEDIR}/python3
     ${CURL} ${PYTHON3_URL} | tar xzf -
     finished
-    step "downloaded ${PYTHON3_URL}"
+    step "Downloaded ${PYTHON3_URL}"
 
     start "Compiling python3"
     # Detect # of CPUs so make jobs can be parallelized
@@ -154,16 +168,45 @@ if [[ ! -d ${BUILDDIR}/python3 ]]; then
 
     step "Installed to ${BUILDDIR}/curator"
     find ${BUILDDIR}/curator | indent
-  fi
+  fi # end install curator
 
   export PYTHONHOME=${BUILDDIR}/python3
   export PYTHONPATH=${BUILDDIR}/curator/lib/python3.4/site-packages
   export LC_ALL=en_US.UTF-8
   export LANG=en_US.UTF-8
 
-  step "curator version"
+  start "Curator version"
   ${BUILDDIR}/curator/bin/curator_cli --version
-fi
+
+  start "Apply ofelia schedule for curator"
+  mkdir -p ${BUILDDIR}/ofelia
+
+  cat << EOF >> ${BUILDDIR}/ofelia/schedule.ini
+[job-local "curator"]
+schedule = ${CURATOR_SCHEDULE}
+command = bin/curator.sh
+EOF
+
+  finished
+
+  step "Create bin/curator.sh"
+  mkdir -p ${BUILDDIR}/.profile.d
+  echo 'PATH=${HOME}/python3/bin:${HOME}/curator/bin:${PATH}:${HOME}/bin' > ${BUILDDIR}/.profile.d/curator.sh
+  cat << EOF >> ${BUILDDIR}/bin/curator.sh
+#!/bin/bash
+export PYTHONHOME=\${HOME}/python3
+export PYTHONPATH=\${HOME}/curator/lib/python3.4/site-packages
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
+export PATH=\${HOME}/python3/bin:\${HOME}/curator/bin:\${PATH}:\${HOME}/bin
+
+\${HOME}/python3/bin/python3 \${HOME}/curator/bin/curator --config \${HOME}/curator.conf.d/curator.yml \${HOME}/curator.conf.d/actions.yml
+EOF
+
+else # else install curator
+  # Create empty schedule.ini for ofelia
+  touch ${BUILDDIR}/ofelia/schedule.ini
+fi # end install curator
 
 # Install OpenJDK
 if [[ ! -d ${BUILDDIR}/openjdk ]]; then
@@ -172,7 +215,7 @@ if [[ ! -d ${BUILDDIR}/openjdk ]]; then
   cd ${BUILDDIR}/openjdk
   ${CURL} ${OPENJDK_URL} | tar zxf -
   finished
-  step "downloaded ${OPENJDK_URL}"
+  step "Downloaded ${OPENJDK_URL}"
 fi
 
 # Install Logstash
@@ -186,7 +229,7 @@ if [[ ! -d ${BUILDDIR}/logstash-${LOGSTASH_VERSION} ]]; then
 
   tar -zx -C ${BUILDDIR} -f ${CACHEDIR}/${LOGSTASH_FILE}
   finished
-  step "downloaded ${LOGSTASH_URL}"
+  step "Downloaded ${LOGSTASH_URL}"
 fi
 
 export JAVA_HOME="${BUILDDIR}/openjdk"
@@ -211,23 +254,39 @@ if [[ ${LOGSTASH_CONFIG_CHECK} -eq 1 ]]; then
   mkdir -p ${CACHEDIR}/logstash.conf.d
 
   start "Check Logstash configuration"
-  ${BUILDDIR}/bin/dockerize -template ${BUILDDIR}/conf.d:${CACHEDIR}/logstash.conf.d ${BUILDDIR}/logstash-${LOGSTASH_VERSION}/bin/logstash -f ${CACHEDIR}/logstash.conf.d -t | indent
+  ${BUILDDIR}/bin/dockerize -template ${BUILDDIR}/conf.d:${CACHEDIR}/logstash.conf.d
+  cat ${CACHEDIR}/logstash.conf.d/* | indent
+  ${BUILDDIR}/logstash-${LOGSTASH_VERSION}/bin/logstash -f ${CACHEDIR}/logstash.conf.d -t | indent
   finished
 fi
 
-mkdir ${BUILDDIR}/logstash.conf.d
-
+step "Create buildpack-release-step.yml"
+mkdir -p ${BUILDDIR}/logstash.conf.d
 cat << EOF >> ${BUILDDIR}/buildpack-release-step.yml
 ---
 default_process_types:
-  web: bin/dockerize -template conf.d:logstash.conf.d /bin/bash -c bin/logstash.sh
+  web: bin/dockerize -template conf.d:logstash.conf.d /bin/bash -c bin/run.sh
 EOF
 
+step "Create bin/run.sh"
 mkdir -p ${BUILDDIR}/.profile.d
-echo 'PATH=$PATH:$HOME/bin:$HOME/openjdk/bin' > ${BUILDDIR}/.profile.d/logstash.sh
+echo 'PATH=${PATH}:${HOME}/bin:${HOME}/openjdk/bin' > ${BUILDDIR}/.profile.d/run.sh
+cat << EOF >> ${BUILDDIR}/bin/run.sh
+#!/bin/bash
+# Prepare curator configuration
+if [[ -d \${HOME}/curator ]]; then
+  mkdir -p \${HOME}/curator.conf.d
+  \${HOME}/bin/dockerize -template \${HOME}/curator.d:\${HOME}/curator.conf.d
+fi
+# Start Ofelia for curator in the background
+\${HOME}/bin/ofelia daemon --config \${HOME}/ofelia/schedule.ini 2>&1 &
 
-echo '#!/bin/bash' > ${BUILDDIR}/bin/logstash.sh
-echo 'export JAVA_HOME=$HOME/openjdk' >> ${BUILDDIR}/bin/logstash.sh
-echo "export LS_HEAP_SIZE=${LS_HEAP_SIZE}" >> ${BUILDDIR}/bin/logstash.sh
-echo "logstash-${LOGSTASH_VERSION}/bin/logstash -f logstash.conf.d ${LOGSTASH_CMD_ARGS}" >> ${BUILDDIR}/bin/logstash.sh
-chmod +x ${BUILDDIR}/bin/logstash.sh
+# Start Logstash
+export JAVA_HOME=\${HOME}/openjdk
+export LS_HEAP_SIZE=${LS_HEAP_SIZE}
+\${HOME}/logstash-${LOGSTASH_VERSION}/bin/logstash -f logstash.conf.d ${LOGSTASH_CMD_ARGS}
+EOF
+
+chmod +x ${BUILDDIR}/bin/*.sh
+
+step "Buildpack compile finished"
