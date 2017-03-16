@@ -66,7 +66,7 @@ DOCKERIZE_URL=${DOCKERIZE_URL:-"https://github.com/jwilder/dockerize/releases/do
 JQ_URL=${JQ_URL:-"https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64"}
 OFELIA_VERSION="v0.2.2"
 OFELIA_URL="https://github.com/mcuadros/ofelia/releases/download/${OFELIA_VERSION}/ofelia_${OFELIA_VERSION}_linux_amd64.tar.gz"
-# " Correct syntax hilighting
+# " Correct syntax highlighting
 
 mkdir -p ${BUILDDIR}/bin
 
