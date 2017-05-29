@@ -3,7 +3,7 @@ language: logstash
 
 default_versions:
   - name: logstash
-    version: 2.4.0
+    version: 5.4.0
 
 url_to_dependency_map:
   - match: logstash-(\d+\.\d+\.\d+)
@@ -12,16 +12,16 @@ url_to_dependency_map:
 
 dependencies:
   - name: logstash
-    version: 2.4.0
-    uri: https://download.elastic.co/logstash/logstash/logstash-2.4.0.tar.gz
-    md5: 2364b354274b59f45b324d341329b042
+    version: 5.4.0
+    uri: https://artifacts.elastic.co/downloads/logstash/logstash-5.4.0.tar.gz
+    md5: 54285600128cd15a5832c154ff108fa3
     cf_stacks:
       - lucid64
       - cflinuxfs2
   - name: openjdk
-    version: 1.7.0
-    uri: https://java-buildpack.cloudfoundry.org/openjdk-jdk/trusty/x86_64/openjdk-1.7.0_51.tar.gz
-    md5: 4c89bf00090082c438fed7c40e453ed2
+    version: 1.8.0
+    uri: https://java-buildpack.cloudfoundry.org/openjdk-jdk/trusty/x86_64/openjdk-1.8.0_131.tar.gz
+    md5: 4260e8e3ba9cafc3d9b35f289aba097c
     cf_stacks:
       - lucid64
       - cflinuxfs2
