@@ -30,13 +30,13 @@ A Logstash Cloud Foundry App has the following structure:
 
 #### Logstash
 
-The `Logstash` file in the root directory of the app is required. It is used by the buildpack to detect if the app is in fact a 
+The `Logstash` file in the root directory of the app is required. It is used by the buildpack to detect if the app is in fact a
 Logstash app. Furthermore it allows to configure the buildpack / the deployment of the app. The `Logstash` file is sourced during deployment
 so it has to be valid `bash` code to work.
 
 The follow settings are allowed:
 
-* `LOGSTASH_VERION`: Version of Logstash to be deployed. Defaults to 2.4.0
+* `LOGSTASH_VERION`: Version of Logstash to be deployed. Defaults to 5.4.0
 * `LOGSTASH_CMD_ARGS`: Additional command line arguments for Logstash. Empty by default
 * `LOGSTASH_PLUGINS`: Array of Logstash plugins, which are not provided with the default Logstash, but are installable by `logstash-plugin`. Empty by default
 * `LOGSTASH_CONFIG_CHECK`: Boolean (0/1) if a pre-flight-check should be performed with the Logstash configuration during app deployment. Defaults to `1`
@@ -49,7 +49,7 @@ Example file:
 ```
 # Configuration-file for Logstash Cloud Foundry Buildpack
 
-LOGSTASH_VERSION="2.4.0"
+LOGSTASH_VERSION="5.4.0"
 LOGSTASH_CMD_ARGS=""
 LOGSTASH_PLUGINS=(
   "logstash-codec-cef"
@@ -75,7 +75,7 @@ to be deployed successfully. All files in this directory are used as part of the
 Prior to the start of Logstash, all files in this directory are processed by [dockerize](https://github.com/jwilder/dockerize) as templates.
 This allow to update the configuration files based on the environment variables provided by Cloud Foundry (e.g. VCAP_APPLICATION, VCAP_SERVICES).
 
-The supported functions for the templates are documented in [dockerize - using templates](https://github.com/jwilder/dockerize/blob/master/README.md#using-templates) 
+The supported functions for the templates are documented in [dockerize - using templates](https://github.com/jwilder/dockerize/blob/master/README.md#using-templates)
 and [golang - template](https://golang.org/pkg/text/template/).
 
 #### curator.d
@@ -109,7 +109,7 @@ cf push -b https://github.com/swisscom/swisscom/cf-buildpack-logstash.git
 ```
 
 After the successful upload of the application to Cloud Foundry, you may use a *user provided service* to ship the logs of your
-application to your newly deployed Logstash applicationrr.
+application to your newly deployed Logstash application.
 
 Create the log drain:
 
