@@ -278,6 +278,10 @@ if [[ -d \${HOME}/curator ]]; then
   mkdir -p \${HOME}/curator.conf.d
   \${HOME}/bin/dockerize -template \${HOME}/curator.d:\${HOME}/curator.conf.d
 fi
+
+# Run curator once to create the logstash index for today
+\${HOME}/bin/curator.sh
+
 # Start Ofelia for curator in the background
 \${HOME}/bin/ofelia daemon --config \${HOME}/ofelia/schedule.ini 2>&1 &
 
