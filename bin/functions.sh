@@ -35,6 +35,6 @@ finished() {
 }
 
 indent() {
-  sed -u 's/^/       /' >&3
+  sed -u 's/^/       /' >&1
 }
 
