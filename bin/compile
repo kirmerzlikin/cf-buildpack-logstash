@@ -110,102 +110,103 @@ if [[ ! -f ${BUILDDIR}/bin/ofelia ]]; then
 fi
 
 # Install curator
-if [[ ! -d ${BUILDDIR}/python3 ]]; then
-  if [[ ${CURATOR_COMPILE} -eq 0 ]]; then
-    # Use precompiled curator with python from S3 bucket
-    start "Download precompiled curator (with python)"
-    cd ${BUILDDIR}
-    ${CURL} ${CURATOR_PRECOMPILED} | tar zxf -
-    finished
-  else # Compile curator, dependecies and python
-    step "Start installing curator (including its dependencies)"
-    start "Download python3"
-    mkdir -p ${BUILDDIR}/python3
-    mkdir -p ${CACHEDIR}/python3
-    cd ${CACHEDIR}/python3
-    ${CURL} ${PYTHON3_URL} | tar xzf -
-    finished
-    step "Downloaded ${PYTHON3_URL}"
+if [[ ${CURATOR_ENABLED} -eq 1 ]]; then
+	if [[ ! -d ${BUILDDIR}/python3 ]]; then
+	  if [[ ${CURATOR_COMPILE} -eq 0 ]]; then
+		# Use precompiled curator with python from S3 bucket
+		start "Download precompiled curator (with python)"
+		cd ${BUILDDIR}
+		${CURL} ${CURATOR_PRECOMPILED} | tar zxf -
+		finished
+	  else # Compile curator, dependecies and python
+		step "Start installing curator (including its dependencies)"
+		start "Download python3"
+		mkdir -p ${BUILDDIR}/python3
+		mkdir -p ${CACHEDIR}/python3
+		cd ${CACHEDIR}/python3
+		${CURL} ${PYTHON3_URL} | tar xzf -
+		finished
+		step "Downloaded ${PYTHON3_URL}"
 
-    start "Compiling python3"
-    # Detect # of CPUs so make jobs can be parallelized
-    CPUS=`grep -c ^processor /proc/cpuinfo`
+		start "Compiling python3"
+		# Detect # of CPUs so make jobs can be parallelized
+		CPUS=`grep -c ^processor /proc/cpuinfo`
 
-    pushd Python-3.4.3
-      ./configure --prefix=${BUILDDIR}/python3 | indent
-      make -j${CPUS} | indent
-      make install | indent
-    popd
-    # PATH: /home/vcap/app/python3/bin
-    # ${BUILDDIR}/python3/bin
-    finished
+		pushd Python-3.4.3
+		  ./configure --prefix=${BUILDDIR}/python3 | indent
+		  make -j${CPUS} | indent
+		  make install | indent
+		popd
+		# PATH: /home/vcap/app/python3/bin
+		# ${BUILDDIR}/python3/bin
+		finished
 
-    step "Download curator and dependencies"
-    mkdir -p ${BUILDDIR}/curator
-    mkdir -p ${CACHEDIR}/curator
-    start "Download certifi"
-    ${CURL} -o ${CACHEDIR}/curator/${CERTIFI_TARGET} ${CERTIFI_URL}
-    finished
+		step "Download curator and dependencies"
+		mkdir -p ${BUILDDIR}/curator
+		mkdir -p ${CACHEDIR}/curator
+		start "Download certifi"
+		${CURL} -o ${CACHEDIR}/curator/${CERTIFI_TARGET} ${CERTIFI_URL}
+		finished
 
-    start "Download click"
-    ${CURL} -o ${CACHEDIR}/curator/${CLICK_TARGET} ${CLICK_URL}
-    finished
+		start "Download click"
+		${CURL} -o ${CACHEDIR}/curator/${CLICK_TARGET} ${CLICK_URL}
+		finished
 
-    start "Download elasticsearch-curator"
-    ${CURL} -o ${CACHEDIR}/curator/${ELASTICSEARCH_CURATOR_TARGET} ${ELASTICSEARCH_CURATOR_URL}
-    finished
+		start "Download elasticsearch-curator"
+		${CURL} -o ${CACHEDIR}/curator/${ELASTICSEARCH_CURATOR_TARGET} ${ELASTICSEARCH_CURATOR_URL}
+		finished
 
-    start "Download elsticsearch"
-    ${CURL} -o ${CACHEDIR}/curator/${ELASTICSEARCH_TARGET} ${ELASTICSEARCH_URL}
-    finished
+		start "Download elsticsearch"
+		${CURL} -o ${CACHEDIR}/curator/${ELASTICSEARCH_TARGET} ${ELASTICSEARCH_URL}
+		finished
 
-    start "Download PyYAML"
-    ${CURL} -o ${CACHEDIR}/curator/${PYYAML_TARGET} ${PYYAML_URL}
-    finished
+		start "Download PyYAML"
+		${CURL} -o ${CACHEDIR}/curator/${PYYAML_TARGET} ${PYYAML_URL}
+		finished
 
-    start "Download urllib3"
-    ${CURL} -o ${CACHEDIR}/curator/${URLLIB3_TARGET} ${URLLIB3_URL}
-    finished
+		start "Download urllib3"
+		${CURL} -o ${CACHEDIR}/curator/${URLLIB3_TARGET} ${URLLIB3_URL}
+		finished
 
-    start "Download voluptuous"
-    ${CURL} -o ${CACHEDIR}/curator/${VOLUPTUOUS_TARGET} ${VOLUPTUOUS_URL}
-    finished
+		start "Download voluptuous"
+		${CURL} -o ${CACHEDIR}/curator/${VOLUPTUOUS_TARGET} ${VOLUPTUOUS_URL}
+		finished
 
-    step "All dependancies should be in ${CACHEDIR}/curator"
-    find ${CACHEDIR}/curator | indent
+		step "All dependancies should be in ${CACHEDIR}/curator"
+		find ${CACHEDIR}/curator | indent
 
-    export PATH=${BUILDDIR}/python3/bin:$PATH
-    # --no-index prevents contacting pypi to download packages
-    # --find-links tells pip where to look for the dependancies
-    pip3 install --no-index --find-links ${CACHEDIR}/curator --install-option="--prefix=${BUILDDIR}/curator" elasticsearch-curator
+		export PATH=${BUILDDIR}/python3/bin:$PATH
+		# --no-index prevents contacting pypi to download packages
+		# --find-links tells pip where to look for the dependancies
+		pip3 install --no-index --find-links ${CACHEDIR}/curator --install-option="--prefix=${BUILDDIR}/curator" elasticsearch-curator
 
-    step "Installed to ${BUILDDIR}/curator"
-    find ${BUILDDIR}/curator | indent
-  fi # end install curator
+		step "Installed to ${BUILDDIR}/curator"
+		find ${BUILDDIR}/curator | indent
+	  fi # end install curator
 
-  export PYTHONHOME=${BUILDDIR}/python3
-  export PYTHONPATH=${BUILDDIR}/curator/lib/python3.4/site-packages
-  export LC_ALL=en_US.UTF-8
-  export LANG=en_US.UTF-8
+	  export PYTHONHOME=${BUILDDIR}/python3
+	  export PYTHONPATH=${BUILDDIR}/curator/lib/python3.4/site-packages
+	  export LC_ALL=en_US.UTF-8
+	  export LANG=en_US.UTF-8
 
-  start "Curator version"
-  ${BUILDDIR}/curator/bin/curator_cli --version
+	  start "Curator version"
+	  ${BUILDDIR}/curator/bin/curator_cli --version
 
-  start "Apply ofelia schedule for curator"
-  mkdir -p ${BUILDDIR}/ofelia
+	  start "Apply ofelia schedule for curator"
+	  mkdir -p ${BUILDDIR}/ofelia
 
-  cat << EOF >> ${BUILDDIR}/ofelia/schedule.ini
+	  cat << EOF >> ${BUILDDIR}/ofelia/schedule.ini
 [job-local "curator"]
 schedule = ${CURATOR_SCHEDULE}
 command = bin/curator.sh
 EOF
 
-  finished
+	  finished
 
-  step "Create bin/curator.sh"
-  mkdir -p ${BUILDDIR}/.profile.d
-  echo 'PATH=${HOME}/python3/bin:${HOME}/curator/bin:${PATH}:${HOME}/bin' > ${BUILDDIR}/.profile.d/curator.sh
-  cat << EOF >> ${BUILDDIR}/bin/curator.sh
+	  step "Create bin/curator.sh"
+	  mkdir -p ${BUILDDIR}/.profile.d
+	  echo 'PATH=${HOME}/python3/bin:${HOME}/curator/bin:${PATH}:${HOME}/bin' > ${BUILDDIR}/.profile.d/curator.sh
+	  cat << EOF >> ${BUILDDIR}/bin/curator.sh
 #!/bin/bash
 export PYTHONHOME=\${HOME}/python3
 export PYTHONPATH=\${HOME}/curator/lib/python3.4/site-packages
@@ -216,10 +217,11 @@ export PATH=\${HOME}/python3/bin:\${HOME}/curator/bin:\${PATH}:\${HOME}/bin
 \${HOME}/python3/bin/python3 \${HOME}/curator/bin/curator --config \${HOME}/curator.conf.d/curator.yml \${HOME}/curator.conf.d/actions.yml
 EOF
 
-else # else install curator
-  # Create empty schedule.ini for ofelia
-  touch ${BUILDDIR}/ofelia/schedule.ini
-fi # end install curator
+	else # else install curator
+	  # Create empty schedule.ini for ofelia
+	  touch ${BUILDDIR}/ofelia/schedule.ini
+	fi # end install curator
+fi
 
 # Install OpenJDK
 if [[ ! -d ${BUILDDIR}/openjdk ]]; then
@@ -287,16 +289,18 @@ echo 'PATH=${PATH}:${HOME}/bin:${HOME}/openjdk/bin' > ${BUILDDIR}/.profile.d/run
 cat << EOF >> ${BUILDDIR}/bin/run.sh
 #!/bin/bash
 # Prepare curator configuration
-if [[ -d \${HOME}/curator ]]; then
-  mkdir -p \${HOME}/curator.conf.d
-  \${HOME}/bin/dockerize -template \${HOME}/curator.d:\${HOME}/curator.conf.d
+if [[ ${CURATOR_ENABLED} -eq 1 ]]; then
+	if [[ -d \${HOME}/curator ]]; then
+	  mkdir -p \${HOME}/curator.conf.d
+	  \${HOME}/bin/dockerize -template \${HOME}/curator.d:\${HOME}/curator.conf.d
+	fi
+
+	# Run curator once to create the logstash index for today
+	\${HOME}/bin/curator.sh
+
+	# Start Ofelia for curator in the background
+	\${HOME}/bin/ofelia daemon --config \${HOME}/ofelia/schedule.ini 2>&1 &
 fi
-
-# Run curator once to create the logstash index for today
-\${HOME}/bin/curator.sh
-
-# Start Ofelia for curator in the background
-\${HOME}/bin/ofelia daemon --config \${HOME}/ofelia/schedule.ini 2>&1 &
 
 # Start Logstash
 export JAVA_HOME=\${HOME}/openjdk
