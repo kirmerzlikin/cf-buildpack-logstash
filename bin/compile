@@ -58,7 +58,7 @@ CLICK_TARGET="click-6.7.tar.gz"
 ELASTICSEARCH_CURATOR_URL="https://github.com/elastic/curator/archive/v5.0.4.tar.gz"
 ELASTICSEARCH_CURATOR_TARGET="elasticsearch-curator-5.0.4.tar.gz"
 # List available releases: https://github.com/elastic/elasticsearch-py/releases
-ELASTICSEARCH_URL="https://github.com/elastic/elasticsearch-py/archive/5.4.0.tar.gz"
+ELASTICSEARCH_PACKAGE_URL="https://github.com/elastic/elasticsearch-py/archive/5.4.0.tar.gz"
 ELASTICSEARCH_TARGET="elasticsearch-5.4.0.tar.gz"
 # List available releases: http://pyyaml.org/download/pyyaml/
 PYYAML_URL="http://pyyaml.org/download/pyyaml/PyYAML-3.12.tar.gz"
@@ -157,7 +157,7 @@ if [[ ${CURATOR_ENABLED} -eq 1 ]]; then
 		finished
 
 		start "Download elsticsearch"
-		${CURL} -o ${CACHEDIR}/curator/${ELASTICSEARCH_TARGET} ${ELASTICSEARCH_URL}
+		${CURL} -o ${CACHEDIR}/curator/${ELASTICSEARCH_TARGET} ${ELASTICSEARCH_PACKAGE_URL}
 		finished
 
 		start "Download PyYAML"
