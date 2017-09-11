@@ -269,6 +269,10 @@ if [[ ${LOGSTASH_CONFIG_CHECK} -eq 1 ]]; then
   mkdir -p ${CACHEDIR}/logstash.conf.d
 
   start "Check Logstash configuration"
+  
+  # Export dummy PORT environment variable, to let it be injected into the configs for checking
+  export PORT=55555
+  
   ${BUILDDIR}/bin/dockerize -template ${BUILDDIR}/conf.d:${CACHEDIR}/logstash.conf.d
   cat ${CACHEDIR}/logstash.conf.d/* | indent
   ${BUILDDIR}/logstash-${LOGSTASH_VERSION}/bin/logstash -f ${CACHEDIR}/logstash.conf.d -t | indent
