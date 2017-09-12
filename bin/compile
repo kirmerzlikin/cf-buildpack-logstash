@@ -274,7 +274,6 @@ if [[ ${LOGSTASH_CONFIG_CHECK} -eq 1 ]]; then
   export PORT=55555
   
   ${BUILDDIR}/bin/dockerize -template ${BUILDDIR}/conf.d:${CACHEDIR}/logstash.conf.d
-  cat ${CACHEDIR}/logstash.conf.d/* | indent
   ${BUILDDIR}/logstash-${LOGSTASH_VERSION}/bin/logstash -f ${CACHEDIR}/logstash.conf.d -t | indent
   finished
 fi
